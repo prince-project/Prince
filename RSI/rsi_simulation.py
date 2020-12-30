@@ -15,6 +15,24 @@ data['AU'] = data['U'].rolling(window=rsi_lookback, min_periods=rsi_lookback).me
 data['AD'] = data['D'].rolling(window=rsi_lookback, min_periods=rsi_lookback).mean()
 data['RSI'] = data['AU'].div(data['AD']+data['AU']) *100
 
+data['time_s'] = 0
+data.loc[data.between_time('23:35', '3:30').index, 'time_s'] = 1
+
+# w/o RSI conditions
+time_in = '23:40'
+time_out = '3:00'
+d2 = data.between_time(time_in, time_out).Close.to_frame()
+d2.index = d2.index + pd.DateOffset(minutes=25)
+d2['date'] = d2.index.date
+
+trade_in_out = pd.concat([d2.groupby('date').first(),d2.groupby('date').last()], axis=1)
+trade_in_out.columns = ['in', 'out']
+trade_in_out['pnl'] = trade_in_out.diff(axis=1).iloc[:,1]
+
+trade_in_out.pnl.cumsum().plot()
+
+# with RSI conditions
+
 ###
 data = pd.read_csv('%s/under_development/projects/202011_Vol/intra/ES_5min_UStime.csv'%gloc)
 data['day']=pd.to_datetime(data['Date']+ ' ' + data['Time'])
@@ -72,7 +90,7 @@ def rsi_trading(cc,rsi,time):
                 df['book'].loc[i] =0
         else:
             df['book'].loc[i] =0
-    return df     
+    return df
 
 def rsi_trading2(cc,rsi,time):
     df=pd.DataFrame({'cc':cc.copy()})
