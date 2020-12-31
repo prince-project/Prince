@@ -1,5 +1,7 @@
 from _setting_prince import *
 
+tloc = '%s/Prince/RSI' % gloc
+
 data = pd.read_csv('%s/under_development/projects/202011_Vol/intra/ES_5min_UStime.csv'%gloc, parse_dates=[['Date', 'Time']]).set_index('Date_Time')
 
 # RSI
@@ -10,7 +12,7 @@ rsi_lookback = 14
 #data['U'] = np.where(data['Close'].diff(1) > 0, data['Close'].diff(1), 0)
 #data['D'] = np.where(df['Close'].diff(1) < 0, df['Close'].diff(1) *(-1), 0)
 data['U'] = np.where(data['Close'].pct_change() > 0, data['Close'].pct_change(), 0)
-data['D'] = np.where(df['Close'].pct_change() < 0, df['Close'].pct_change() *(-1), 0)
+data['D'] = np.where(data['Close'].pct_change() < 0, data['Close'].pct_change() *(-1), 0)
 data['AU'] = data['U'].rolling(window=rsi_lookback, min_periods=rsi_lookback).mean()
 data['AD'] = data['D'].rolling(window=rsi_lookback, min_periods=rsi_lookback).mean()
 data['RSI'] = data['AU'].div(data['AD']+data['AU']) *100
@@ -19,17 +21,30 @@ data['time_s'] = 0
 data.loc[data.between_time('23:35', '3:30').index, 'time_s'] = 1
 
 # w/o RSI conditions
-time_in = '23:40'
-time_out = '3:00'
+time_in = '23:35'
+time_out = '3:30'
 d2 = data.between_time(time_in, time_out).Close.to_frame()
 d2.index = d2.index + pd.DateOffset(minutes=25)
 d2['date'] = d2.index.date
 
 trade_in_out = pd.concat([d2.groupby('date').first(),d2.groupby('date').last()], axis=1)
 trade_in_out.columns = ['in', 'out']
-trade_in_out['pnl'] = trade_in_out.diff(axis=1).iloc[:,1]
+trade_in_out['pnl'] = trade_in_out.diff(axis=1).iloc[:,1] * 50
+trade_in_out['pnl_cost'] = trade_in_out['pnl'] - 0.25 * 2 * 50
 
 trade_in_out.pnl.cumsum().plot()
+
+fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(12,8))
+trade_in_out[['pnl', 'pnl_cost']].fillna(0).cumsum().plot(ax=axe, title='Go long 1 lot')
+axe.title.set_size(14)
+axe.set_xlabel('', fontsize=12)
+axe.set_ylabel('$', fontsize=12)
+axe.tick_params(axis='both', which='both', labelsize=12)
+axe.tick_params(axis='x', rotation=0)
+axe.legend(loc='upper left',prop={'size':12})
+axe.grid(alpha=0.2)
+plt.tight_layout()
+plt.savefig('%s/pnl_gap_hours.png' % (tloc))
 
 # with RSI conditions
 
