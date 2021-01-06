@@ -80,3 +80,29 @@ def vix_s(v,s):
     else:
         c=0
     return c 
+
+# how to determine the number of lots to hold given capital
+## drawdown analysis
+## calcualte dollar pnl for miniVIX
+
+# miniVIX
+## multiplier = $100 (c.f. VIX = $1,000)
+## tickvalue = 0.05 * $100 = $5 (c.f. VIX = $50)
+
+## verify VIX signal
+
+tmp = pd.concat([vix.close.diff(), rt_signal.shift()], axis=1)
+
+pnl = tmp.iloc[:,0] * tmp.iloc[:,1] * 100
+
+fig, axe = plt.subplots(nrows=1, ncols=1, figsize=(10,8))
+pnl.cumsum().plot(ax=axe, title='miniVIX - trading 1 lot')
+axe.title.set_size(14)
+axe.set_xlabel('', fontsize=10)
+axe.set_ylabel('$', fontsize=10)
+axe.tick_params(axis='both', which='both', labelsize=10)
+axe.tick_params(axis='x', rotation=0)
+axe.grid(alpha=0.2)
+axe.autoscale(tight=False)
+plt.tight_layout()
+plt.savefig('%s/pnl_vix_signal.png' % (tloc))
