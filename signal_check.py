@@ -28,6 +28,8 @@ order by date
 """
 skew = pd.read_sql(qry, engine_dev, parse_dates=['date'], index_col=['date'])
 
+vf = load_fut_data_db('VIX', conn_dev).close
+
 spx['ret'] = spx.close.pct_change()
 spx['intra_vol'] = (spx.high - spx.low) / spx.close
 spx['intra_bar'] = spx.intra_vol.rolling(3).mean().shift(1)*100*0.5
@@ -43,7 +45,7 @@ vix['rank'] = vix.mov_20.dropna().rolling(window=nn).apply(lambda x:( x.rank(asc
 skew['rank'] = skew.mov_20.dropna().rolling(window=nn).apply(lambda x:( x.rank(ascending=True)[-1])/nn,raw=False)
 
 vix['trend'] = np.where(vix.mov_long > vix.mov_short, 1, 0)
-vix['signal'] = pd.concat([vix.rank, skew.rank], axis=1).dropna().apply(lambda x: vix_s(x[0],x[1]),axis=1)
+vix['signal'] = pd.concat([vix['rank'], skew['rank']], axis=1).dropna().apply(lambda x: vix_s(x[0],x[1]),axis=1)
 
 rt_signal = vix[['signal', 'trend']].dropna().apply(lambda x: rt_s(x[0],x[1]),axis=1)
 scale_n = 100
@@ -91,7 +93,7 @@ def vix_s(v,s):
 
 ## verify VIX signal
 
-tmp = pd.concat([vix.close.diff(), rt_signal.shift()], axis=1)
+tmp = pd.concat([vf.close.diff(), rt_signal.shift()], axis=1)
 
 pnl = tmp.iloc[:,0] * tmp.iloc[:,1] * 100
 
