@@ -56,8 +56,6 @@ def vix_s(v,s):
         c=0
     return c 
 
-vf = load_fut_data_db('VIX', conn_dev).close
-
 spx['ret'] = spx.close.pct_change()
 spx['intra_vol'] = (spx.high - spx.low) / spx.close
 spx['intra_bar'] = spx.intra_vol.rolling(3).mean().shift(1)*100*0.5
@@ -139,7 +137,6 @@ roll_cost.columns = ['c%s'%i for i in np.arange(1, 9)]
 
 pnl = pd.concat([price.diff().c1, roll_cost.c1], axis=1).sum(axis=1)
 
-
 #tmp = pd.concat([vf.close.diff(), rt_signal.shift()], axis=1)
 tmp = pd.concat([pnl, rt_signal.shift()], axis=1)
 
@@ -171,13 +168,27 @@ spx['barrier'] = (spx['high'] - spx['low']) / spx['close']
 spx['bsmth'] = spx['barrier'].rolling(5).mean() * 0.5
 spx['dlvl'] = (spx['close'] - spx['close'] * spx['bsmth']).shift(1)
 spx['down'] = np.where(spx['dlvl'] >= spx['low'],1,0)
+spx['open_lower'] = np.where(spx['open'] < spx['dlvl'], 1, 0)
 spx['pnl_down'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['close'] - spx['open']), spx['down'] * (spx['close'] - spx['dlvl']))
+spx['pnl_down2'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['close'] - spx['dlvl']), spx['down'] * (spx['close'] - spx['dlvl']))
 
 
 
 
+#--------------------
+# determine wegiths
+#--------------------
+vf = load_fut_data_db('VIX', conn_dev).close.to_frame()
+sf = get_data_ready('SP500', 0, fxrate, conn_dev).close.to_frame()
 
-# how to determine the number of lots to hold given capital
-## drawdown analysis
-## calcualte dollar pnl for miniVIX
+vf['year'] = vf.index.year
+vf['week'] = vf.index.week
+vf_group = vf.groupby(['year', 'week']).last()
+vf_wret =  vf_group.diff()
+vf_ret = vf.close.diff().to_frame()
 
+sf['year'] = sf.index.year
+sf['week'] = sf.index.week
+sf_group = sf.groupby(['year', 'week']).last()
+sf_wret =  sf_group.diff()
+sf_ret = sf.close.diff().to_frame()
