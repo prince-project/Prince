@@ -212,3 +212,5 @@ for j in np.arange(2):
     #axe[j].autoscale(tight=False)
 plt.tight_layout()
 plt.savefig('%s/xx.png' % (tloc))
+
+
