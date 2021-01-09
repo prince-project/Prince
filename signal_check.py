@@ -118,7 +118,7 @@ for d in spec.roll_date.values:
     else:
         for i in np.arange(1,10):
             if (spec.roll_date.shift(i)==d).sum() == 1:
-                expiry.loc[d]['c%s'%i] = spec[spec.roll_date.shift(i)==d].index[0]
+                expiry.loc[pd.Timestamp(d)]['c%s'%i] = spec[spec.roll_date.shift(i)==d].index[0]
 expiry = expiry.ffill()['2005':]
 
 # get price for each day/contract
@@ -192,3 +192,23 @@ sf['week'] = sf.index.week
 sf_group = sf.groupby(['year', 'week']).last()
 sf_wret =  sf_group.diff()
 sf_ret = sf.close.diff().to_frame()
+
+## short vix 1 lot
+fig, axe = plt.subplots(nrows=1, ncols=2, figsize=(20,8))
+(-100 * vf_ret).boxplot(ax=axe[0])
+(-100 * vf_wret).boxplot(ax=axe[1])
+axe[0].set_xticklabels(['daily'])
+axe[1].set_xticklabels(['weekly'])
+axe[0].set_title('Daily p&l (return x $100)')
+axe[1].set_title('Weekly p&l (return x $100)')
+for j in np.arange(2):
+    axe[j].title.set_size(14)
+    axe[j].set_xlabel('', fontsize=10)
+    axe[j].set_ylabel('$', fontsize=10)
+    axe[j].tick_params(axis='both', which='both', labelsize=10)
+    #axe[j].legend(loc='upper right',prop={'size':9})
+    axe[j].tick_params(axis='x', rotation=0)
+    axe[j].grid(alpha=0.2)
+    #axe[j].autoscale(tight=False)
+plt.tight_layout()
+plt.savefig('%s/xx.png' % (tloc))
