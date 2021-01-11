@@ -159,7 +159,7 @@ plt.savefig('%s/pnl_vix_signal.png' % (tloc))
 #--------------------
 ## micro E-mini
 ## multiplier $5 (c.f E-mini $50)
-## tick value = 0.25*$5 = $.125
+## tick value = 0.25*$5 = $1.25
 
 #sf = get_data_ready('SP500', 0, fxrate, conn_dev)
 #tmp = pd.concat([spx.close, sf.close], axis=1)
@@ -173,7 +173,9 @@ spx['pnl_down'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['c
 spx['pnl_down2'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['close'] - spx['dlvl']), spx['down'] * (spx['close'] - spx['dlvl']))
 
 
+spx['intra_bar'] = spx.intra_vol.rolling(3).mean()*0.5
 
+sf = load_fut_data_db('SP500', conn_dev)
 
 #--------------------
 # determine wegiths
