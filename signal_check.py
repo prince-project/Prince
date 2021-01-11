@@ -172,6 +172,13 @@ spx['open_lower'] = np.where(spx['open'] < spx['dlvl'], 1, 0)
 spx['pnl_down'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['close'] - spx['open']), spx['down'] * (spx['close'] - spx['dlvl']))
 spx['pnl_down2'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['close'] - spx['dlvl']), spx['down'] * (spx['close'] - spx['dlvl']))
 
+((spx['open'] - spx['high'])/spx['open']).plot()
+((spx['open'] - spx['low'])/spx['open']).plot()
+
+((spx['close'].shift() - spx['open'])/spx['open']).plot()
+
+spx['tmp'] = np.where(spx['open'] < spx['dlvl'], 1, 0)
+
 
 spx['intra_bar'] = spx.intra_vol.rolling(3).mean()*0.5
 
