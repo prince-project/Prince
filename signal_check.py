@@ -179,30 +179,33 @@ spx['pnl_down2'] = -5 * np.where(spx['open'] < spx['dlvl'], spx['down'] * (spx['
 # determine wegiths
 #--------------------
 vf = load_fut_data_db('VIX', conn_dev).close.to_frame()
-sf = get_data_ready('SP500', 0, fxrate, conn_dev).close.to_frame()
+tmp = pd.concat([vf, vix_pnl.fillna(0).cumsum(), spx['pnl_down'].fillna(0).cumsum()], axis=1)['2005':]
+tmp.columns = ['vix', 'vix_sig', 'intra_sig']
+tmp['year'] = tmp.index.year
+tmp['week'] = tmp.index.week
+tmp_group = tmp.groupby(['year', 'week']).last()
+tmp_wret =  tmp_group.diff()
+tmp_ret = tmp.diff()
 
-vf['year'] = vf.index.year
-vf['week'] = vf.index.week
-vf_group = vf.groupby(['year', 'week']).last()
-vf_wret =  vf_group.diff()
-vf_ret = vf.close.diff().to_frame()
-
-sf['year'] = sf.index.year
-sf['week'] = sf.index.week
-sf_group = sf.groupby(['year', 'week']).last()
-sf_wret =  sf_group.diff()
-sf_ret = sf.close.diff().to_frame()
-
-## short vix 1 lot
-fig, axe = plt.subplots(nrows=1, ncols=2, figsize=(20,8))
-(-100 * vf_ret).boxplot(ax=axe[0])
-(-100 * vf_wret).boxplot(ax=axe[1])
+## boxplot
+fig, axe = plt.subplots(nrows=1, ncols=5, figsize=(30,6))
+(-100 * tmp_ret.vix).to_frame().boxplot(ax=axe[0])
+(-100 * tmp_wret.vix).to_frame().boxplot(ax=axe[1])
+tmp_ret.vix_sig.to_frame().boxplot(ax=axe[2])
+tmp_wret.vix_sig.to_frame().boxplot(ax=axe[3])
+tmp_ret.intra_sig.to_frame().boxplot(ax=axe[4])
 axe[0].set_xticklabels(['daily'])
 axe[1].set_xticklabels(['weekly'])
-axe[0].set_title('Daily p&l (return x $100)')
-axe[1].set_title('Weekly p&l (return x $100)')
-for j in np.arange(2):
-    axe[j].title.set_size(14)
+axe[2].set_xticklabels(['daily'])
+axe[3].set_xticklabels(['weekly'])
+axe[4].set_xticklabels(['daily'])
+axe[0].set_title('Vix index- Daily p&l')
+axe[1].set_title('Vix index- Weekly p&l')
+axe[2].set_title('Vix pnl - Daily p&l')
+axe[3].set_title('Vix pnl - Weekly p&l')
+axe[4].set_title('Intra pnl - Daily p&l')
+for j in np.arange(5):
+    axe[j].title.set_size(12)
     axe[j].set_xlabel('', fontsize=10)
     axe[j].set_ylabel('$', fontsize=10)
     axe[j].tick_params(axis='both', which='both', labelsize=10)
@@ -211,6 +214,6 @@ for j in np.arange(2):
     axe[j].grid(alpha=0.2)
     #axe[j].autoscale(tight=False)
 plt.tight_layout()
-plt.savefig('%s/xx.png' % (tloc))
+plt.savefig('%s/pnl_boxplot.png' % (tloc))
 
 
