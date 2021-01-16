@@ -226,3 +226,6 @@ plt.tight_layout()
 plt.savefig('%s/pnl_boxplot.png' % (tloc))
 
 
+#--------------------
+# determine wegiths - return-based
+#--------------------
