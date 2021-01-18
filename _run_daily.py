@@ -67,7 +67,7 @@ vol_scale = vix.mov_2.dropna().rolling(window=scale_n).apply(lambda x:( x.rank(a
 
 
 # calculate intra level
-close_price = # put in 16:00 price of S&P500 futures on the previous day
+close_price = 3757.0# put in 16:00 C.T. price of S&P500 futures on the previous day
 intra_level = close_price - close_price * spx['intra_bar'][-1]
 
 print(pd.DataFrame([intra_level, vol_scale[-1]], index=['Level', 'Exposure']))
