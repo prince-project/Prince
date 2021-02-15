@@ -79,16 +79,30 @@ import pprint
 group = kiwoom.GetThemeGroupList(1)
 pprint.pprint(group)
 
+# 그룹 코드
+tickers = kiwoom.GetThemeGroupCode('141')
+print(tickers)
+
+# 매수/매도
+## 주식계좌
+accounts = kiwoom.GetLoginInfo("ACCNO")
+stock_account = accounts[0]
+
+## 삼성전자, 10주, 시장가주문 매수
+for i in range(10):
+    kiwoom.SendOrder("시장가매수", "0101", stock_account, 1, "005930", 10, 0, "03", "")
+    time.sleep(0.2)
+    print(i, "매수 완료")
+
+# 삼성전자, 10주, 시장가주문 매도
+kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, "005930", 10, 0, "03", "")
+
 # 조건 검색
-# 조건식을 PC로 다운로드
+## 조건식을 PC로 다운로드
 kiwoom.GetConditionLoad()
-
-# 전체 조건식 리스트 얻기
+## 전체 조건식 리스트 얻기
 conditions = kiwoom.GetConditionNameList()
-
-# 0번 조건식에 해당하는 종목 리스트 출력
-condition_index = conditions[0][0]
-condition_name = conditions[0][1]
+## 0번 조건식에 해당하는 종목 리스트 출력
+condition_index, condition_name = conditions[0]
 codes = kiwoom.SendCondition("0101", condition_name, condition_index, 0)
-
 print(codes)

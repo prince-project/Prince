@@ -98,6 +98,7 @@ class KiwoomG:
         """
         로그인 윈도우를 실행합니다.
         :param block: True: 로그인완료까지 블록킹 됨, False: 블록킹 하지 않음
+        : 0 - 버전 수동처리, 1 - 버전 자동처리
         :return: None
         """
         self.ocx.dynamicCall("CommConnect(%s)"%login_type)
@@ -127,25 +128,32 @@ class KiwoomG:
 
     def GetCommData(self, trcode, rqname, index, item): #checked
         """
-        수순 데이터를 가져가는 메서드
+        수신 데이터를 가져가는 메서드
         :param trcode: TR 코드
         :param rqname: 요청 이름
         :param index: 멀티데이터의 경우 row index
         :param item: 얻어오려는 항목 이름
-        :return:
+        :return: 수신 데이터
+        :ex) 현재가출력 - GetCommData("OPT00001", "해외선물기본정보", 0, "현재가")
         """
         data = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, index, item)
         return data.strip()
 
     def CommTerminate(self): #checked
+        """
+        OpenAPI의 서버 접속을 해제한다
+        """
         self.ocx.dynamicCall("CommTerminate()")
 
     def GetRepeatCnt(self, trcode, rqname): #checked
         """
+        레코드 반복횟수를 반환
         멀티데이터의 행(row)의 개수를 얻는 메서드
         :param trcode: TR코드
         :param rqname: 사용자가 설정한 요청이름
         :return: 멀티데이터의 행의 개수
+        :        레코드의 반복횟수
+        :ex) GetRepeatCnt("OPT00001", "해외선물체결데이타")
         """
         count = self.ocx.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
         return count
@@ -159,21 +167,29 @@ class KiwoomG:
         self.ocx.dynamicCall("DisconnectRealData(QString)", screen)
 
     def GetCommRealData(self, code, fid): #checked
+        """
+        실시간 데이터를 반환
+        ex) GetCommRealData("해외선물시세", 10)
+        """
         data = self.ocx.dynamicCall("GetCommRealData(QString, int)", code, fid)
         return data
 
     def GetChejanData(self, fid): #checked
+        """
+        체결잔고 데이터 반환
+        ex) GetChejanData(910) //체결가격
+        """
         data = self.ocx.dynamicCall("GetChejanData(int)", fid)
         return data
 
     def SendOrder(self, rqname, screen, accno, order_type, code, quantity, price, stop, hoga, order_no): #checked
         """
-        주식 주문을 서버로 전송하는 메서드
+        주문을 서버로 전송하는 메서드
         시장가 주문시 주문단가는 0으로 입력해야 함 (가격을 입력하지 않음을 의미)
         :param rqname: 사용자가 임의로 지정할 수 있는 요청 이름
         :param screen: 화면번호 ('0000' 또는 '0' 제외한 숫자값으로 200개로 한정된 값
         :param accno: 계좌번호 10자리
-        :param order_type: 1: 신규매수, 2: 신규매도, 3: 매수취소, 4: 매도취소, 5: 매수정정, 6: 매도정정
+        :param order_type: 1: 신규매도, 2: 신규매수, 3: 매도취소, 4: 매수취소, 5: 매도정정, 6: 매수정정
         :param code: 종목코드
         :param quantity: 주문수량
         :param price: 주문단가
@@ -185,6 +201,11 @@ class KiwoomG:
                      61: 장전시간외종가, 62: 시간외단일가, 81: 장후시간외종가
         :param order_no: 원주문번호로 신규 주문시 공백, 정정이나 취소 주문시에는 원주문번호를 입력
         :return:
+        ex)
+        지정가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0.7900”, “2”, “”);
+        시장가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0”, “1”, “”);
+        매수 정정 - openApi.SendOrder(“RQ_1”,“0101”, “5015123410”, 6, “6AH16”, 10, “0.7800”, “0”, “200060”);
+        매수 취소 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 4, “6AH16”, 10, “0”, “0”, “200061”);
         """
         ret = self.ocx.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, int, QString, QString)",
                                    [rqname, screen, accno, order_type, code, quantity, price, stop, hoga, order_no])
