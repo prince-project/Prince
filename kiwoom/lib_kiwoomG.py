@@ -273,6 +273,42 @@ class KiwoomG:
         ret = self.ocx.dynamicCall("GetAPIModulePath()")
         return ret
 
+    def GetCommonFunc(self, func_name, param): #checked
+        """
+        공통함수로 추후 추가함수가 필요시 사용할 함수
+        :param func_name: 함수명
+        :param param: 인자값
+        :return: 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetCommonFunc(QString, QString)", [func_name, param])
+        return ret
+
+    def GetConvertPrice(self, code, price, ntype): # checked
+        """
+        가격 진법에 따라 변환된 가격을 반환
+        :param code: 종목코드
+        :param price: 가격
+        :param ntype: 타입(0 : 진법->10진수, 1 : 10진수->진법)
+        :return: 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetConvertPrice(QString, QString, int)", [code, price, ntype])
+        return ret 
+
+    def GetGlobalFutOpCodeInfoByType(self, gubun, type): #checked
+        """
+        해외선물옵션종목코드정보를 타입별로 반환
+        :param gubun: 0(해외선물), 1(해외옵션)
+        :param type: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
+        :return: 종목코드정보리스트들을 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByType(int, QString)", [gubun, type])
+        return ret 
+
+
+
+
+
+
 
     def CommKwRqData(self, arr_code, next, code_count, type, rqname, screen):
         """

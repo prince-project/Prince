@@ -31,3 +31,5 @@ print(firewall)
 # global futures list
 futures_list = kiwoom.GetGlobalFutureItemlist()
 futures_code_list = kiwoom.GetGlobalFutureCodelist("6M") 
+
+res = kiwoom.GetGlobalFutOpCodeInfoByType(0, "IDX")
