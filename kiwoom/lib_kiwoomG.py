@@ -294,17 +294,95 @@ class KiwoomG:
         ret = self.ocx.dynamicCall("GetConvertPrice(QString, QString, int)", [code, price, ntype])
         return ret 
 
-    def GetGlobalFutOpCodeInfoByType(self, gubun, type): #checked
+    def GetGlobalFutOpCodeInfoByType(self, gubun, stype): #checked
         """
         해외선물옵션종목코드정보를 타입별로 반환
         :param gubun: 0(해외선물), 1(해외옵션)
-        :param type: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
+        :param stype: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
         :return: 종목코드정보리스트들을 문자값으로 반환
         """
-        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByType(int, QString)", [gubun, type])
+        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByType(int, QString)", [gubun, stype])
         return ret 
 
+    def GetGlobalFutOpCodeInfoByCode(self, scode): #checked
+        """
+        해외선물옵션종목코드정보를 종목코드별로 반환
+        :param scode: 해외선물옵션 종목코드
+        :return: 종목코드정보리스트들을 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByCode(QString)", scode)
+        return ret 
 
+    def GetGlobalFutureItemlistByType(self, stype): #checked
+        """
+        해외선물상품리스트를 타입별로 반환
+        :param stype: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
+        :return: 상품리스트를 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalFutureItemlistByType(QString)", stype)
+        return ret 
+
+    def GetGlobalFutureCodeByItemMonth(self, sitem, smonth): #checked
+        """
+        해외선물종목코드를 상품/월물별로 반환
+        :param sitem: 상품코드(6A, ES..)
+        :param smonth: “201606”
+        :return: 종목코드를 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalFutureCodeByItemMonth(QString, QString)", [sitem, smonth])
+        return ret 
+
+    def GetGlobalOptionCodeByMonth(self, sitem, cp_gubun, act_price, smonth): #checked
+        """
+        해외옵션종목코드를 상품/콜풋/행사가/월물별로 반환
+        :param sitem: 상품코드(6A, ES..)
+        :param cp_gubun: C(콜)/P(풋)
+        :param act_price: 0.760
+        :param smonth: “201606”
+        :return: 종목코드를 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalOptionCodeByMonth(QString, QString, QString, QString)", [sitem, cp_gubun, act_price, smonth])
+        return ret 
+
+    def GetGlobalOptionMonthByItem(self, sitem): #checked
+        """
+        해외옵션월물리스트를 상품별로 반환
+        :param sitem: 상품코드(6A, ES..)
+        :return: 월물리스트를 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalOptionMonthByItem(QString)", sitem)
+        return ret 
+
+    def GetGlobalOptionActPriceByItem(self, sitem): #checked
+        """
+        해외옵션행사가리스트를 상품별로 반환
+        :param sitem: 상품코드(6A, ES..)
+        :return: 행사가리스트를 문자값으로 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalOptionActPriceByItem(QString)", sitem)
+        return ret 
+
+    def GetGlobalFutureItemTypelist(self): #checked
+        """
+        해외선물상품타입리스트를 반환
+        :return: 상품타입리스트를 문자값으로 반환; e.g) IDX;CUR;INT;MLT;ENG;CMD; 반환
+        """
+        ret = self.ocx.dynamicCall("GetGlobalFutureItemTypelist()")
+        return ret
+
+    def GetCommFullData(self, tr_code, record_name, gubun): #checked
+        """
+        수신된 전체데이터를 반환
+        :param tr_code: Tran 코드
+        :param record_name: 레코드명
+        :param gubun: 0 : 전체(싱글+멀티), 1 : 싱글데이타, 2 : 멀티데이타
+        :return: 수신 전체데이터를 문자값으로 반환
+        :비고
+            WKOAStudio의 TR목록탭에서 필드 사이즈 참조.(필드명 옆 가로안의 값들)
+            모든 시세/원장 조회에 사용 가능하며, 특히 차트데이타 같은 대용량 데이터를 한번에 받아서 처리가능
+        """
+        ret = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", [tr_code, record_name, gubun])
+        return ret 
 
 
 
@@ -324,100 +402,6 @@ class KiwoomG:
         ret = self.ocx.dynamicCall("CommKwRqData(QString, bool, int, int, QString, QString)", arr_code, next, code_count, type, rqname, screen);
         return ret
 
-    def GetCodeListByMarket(self, market):
-        """
-        시장별 상장된 종목코드를 반환하는 메서드
-        :param market: 0: 코스피, 3: ELW, 4: 뮤추얼펀드 5: 신주인수권 6: 리츠
-                       8: ETF, 9: 하이일드펀드, 10: 코스닥, 30: K-OTC, 50: 코넥스(KONEX)
-        :return: 종목코드 리스트 예: ["000020", "000040", ...]
-        """
-        data = self.ocx.dynamicCall("GetCodeListByMarket(QString)", market)
-        tokens = data.split(';')[:-1]
-        return tokens
-
-    def GetMasterCodeName(self, code):
-        """
-        종목코드에 대한 종목명을 얻는 메서드
-        :param code: 종목코드
-        :return: 종목명
-        """
-        data = self.ocx.dynamicCall("GetMasterCodeName(QString)", code)
-        return data
-
-    def GetMasterListedStockCnt(self, code):
-        """
-        종목에 대한 상장주식수를 리턴하는 메서드
-        :param code: 종목코드
-        :return: 상장주식수
-        """
-        data = self.ocx.dynamicCall("GetMasterListedStockCnt(QString)", code)
-        return data
-
-    def GetMasterConstruction(self, code):
-        """
-        종목코드에 대한 감리구분을 리턴
-        :param code: 종목코드
-        :return: 감리구분 (정상, 투자주의 투자경고, 투자위험, 투자주의환기종목)
-        """
-        data = self.ocx.dynamicCall("GetMasterConstruction(QString)", code)
-        return data
-
-    def GetMasterListedStockDate(self, code):
-        """
-        종목코드에 대한 상장일을 반환
-        :param code: 종목코드
-        :return: 상장일 예: "20100504"
-        """
-        data = self.ocx.dynamicCall("GetMasterListedStockDate(QString)", code)
-        return datetime.datetime.strptime(data, "%Y%m%d")
-
-    def GetMasterLastPrice(self, code):
-        """
-        종목코드의 전일가를 반환하는 메서드
-        :param code: 종목코드
-        :return: 전일가
-        """
-        data = self.ocx.dynamicCall("GetMasterLastPrice(QString)", code)
-        return int(data)
-
-    def GetMasterStockState(self, code):
-        """
-        종목의 종목상태를 반환하는 메서드
-        :param code: 종목코드
-        :return: 종목상태
-        """
-        data = self.ocx.dynamicCall("GetMasterStockState(QString)", code)
-        return data.split("|")
-
-    def GetDataCount(self, record):
-        count = self.ocx.dynamicCall("GetDataCount(QString)", record)
-        return count
-
-    def GetOutputValue(self, record, repeat_index, item_index):
-        count = self.ocx.dynamicCall("GetOutputValue(QString, int, int)", record, repeat_index, item_index)
-        return count
-
-    def GetThemeGroupList(self, type=1):
-        data = self.ocx.dynamicCall("GetThemeGroupList(int)", type)
-        tokens = data.split(';')
-        if type == 0:
-            grp = {x.split('|')[0]:x.split('|')[1] for x in tokens}
-        else:
-            grp = {x.split('|')[1]: x.split('|')[0] for x in tokens}
-        return grp
-
-    def GetThemeGroupCode(self, theme_code):
-        data = self.ocx.dynamicCall("GetThemeGroupCode(QString)", theme_code)
-        data = data.split(';')
-        return [x[1:] for x in data]
-
-    def GetFutureList(self):
-        data = self.ocx.dynamicCall("GetFutureList()")
-        return data
-
-    def GetCommDataEx(self, trcode, record):
-        data = self.ocx.dynamicCall("GetCommDataEx(QString, QString)", trcode, record)
-        return data
 
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
@@ -442,54 +426,6 @@ class KiwoomG:
 
         return self.tr_data
 
-    def SetRealReg(self, screen, code_list, fid_list, real_type):
-        ret = self.ocx.dynamicCall("SetRealReg(QString, QString, QString, QString)", screen, code_list, fid_list, real_type)
-        return ret
-
-    def SetRealRemove(self, screen, del_code):
-        ret = self.ocx.dynamicCall("SetRealRemove(QString, QString)", screen, del_code)
-        return ret
-
-    def GetConditionLoad(self, block=True):
-        self.condition_loaded = False
-        self.ocx.dynamicCall("GetConditionLoad()")
-        if block:
-            while not self.condition_loaded:
-                pythoncom.PumpWaitingMessages()
-
-    def GetConditionNameList(self):
-        data = self.ocx.dynamicCall("GetConditionNameList()")
-        conditions = data.split(";")[:-1]
-
-        # [('000', 'perpbr'), ('001', 'macd'), ...]
-        result = []
-        for condition in conditions:
-            cond_index, cond_name = condition.split('^')
-            result.append((cond_index, cond_name))
-
-        return result
-
-    def SendCondition(self, screen, cond_name, cond_index, search):
-        self.tr_condition_loaded = False
-        self.ocx.dynamicCall("SendCondition(QString, QString, int, int)", screen, cond_name, cond_index, search)
-
-        while not self.tr_condition_loaded:
-            pythoncom.PumpWaitingMessages()
-
-        return self.tr_condition_data
-
-    def SendConditionStop(self, screen, cond_name, index):
-        self.ocx.dynamicCall("SendConditionStop(QString, QString, int)", screen, cond_name, index)
-
-    def GetCommDataEx(self, trcode, rqname):
-        data = self.ocx.dynamicCall("GetCommDataEx(QString, QString)", trcode, rqname)
-        return data
-
-    def SendOrder(self, rqname, screen, accno, order_type, code, quantity, price, hoga, order_no):
-        self.ocx.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
-                             [rqname, screen, accno, order_type, code, quantity, price, hoga, order_no])
-        # 주문 후 0.2초 대기
-        time.sleep(0.2)
 
 
 if not QApplication.instance():
