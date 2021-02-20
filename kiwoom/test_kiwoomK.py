@@ -172,7 +172,7 @@ for i, code in enumerate(codes):
     df.to_excel(out_name)
     time.sleep(3.6)
 
-#전 종목 일봉 데이터 머지(merge) 
+# 전 종목 일봉 데이터 머지(merge) 
 flist = os.listdir()
 xlsx_list = [x for x in flist if x.endswith('.xlsx')]
 close_data = []
@@ -188,3 +188,23 @@ for xls in xlsx_list:
 
 df = pd.concat(close_data, axis=1)
 df.to_excel("merge.xlsx")
+
+# 매수하기
+df = pd.read_excel("momentum_list.xlsx")
+df.columns = ["종목코드", "모멘텀", "순위"]
+
+## 종목명 추가하기
+kiwoom = Kiwoom()
+kiwoom.CommConnect(block=True)
+codes = df["종목코드"]
+names = [kiwoom.GetMasterCodeName(code) for code in codes]
+df['종목명'] = pd.Series(data=names)
+
+## 매수하기
+accounts = kiwoom.GetLoginInfo('ACCNO')
+account = accounts[0]
+
+for code in codes:
+    ret = kiwoom.SendOrder("시장가매수", "0101", account, 1, code, 100, 0, "03", "")
+    time.sleep(0.2)
+    print(code, "종목 시장가 주문 완료")
