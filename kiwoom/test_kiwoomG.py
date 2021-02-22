@@ -30,6 +30,22 @@ print(firewall)
 
 # global futures list
 futures_list = kiwoom.GetGlobalFutureItemlist()
-futures_code_list = kiwoom.GetGlobalFutureCodelist("6M") 
+futures_code_list = kiwoom.GetGlobalFutureCodelist("ES") 
 
 res = kiwoom.GetGlobalFutOpCodeInfoByType(0, "IDX")
+
+# ESH21
+df = kiwoom.block_request("opt10001",
+                          종목코드="MESH21",
+                          output="종목정보조회",
+                          next=0)
+print(df)
+
+df = kiwoom.block_request("opt10013",
+                          종목코드="ESH21",
+                          시간단위="0",
+                          output="일별데이터조회",
+                          next=0)
+print(df.head())
+
+kiwoom.CommTerminate()

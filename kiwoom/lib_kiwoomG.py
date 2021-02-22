@@ -3,10 +3,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 import pythoncom
 import datetime
-from pykiwoom import parser
+#from pykiwoom import parser
 import pandas as pd
 import time
 import logging
+import os
+
+sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
+from kiwoomG_parser import *
 
 logging.basicConfig(filename="log.txt", level=logging.ERROR)
 
@@ -20,7 +24,6 @@ class KiwoomG:
         self.tr_data = None                 # tr output data
         self.tr_record = None
         self.tr_remained = False
-        self.condition_loaded = False
         self._set_signals_slots()
 
         if login:
@@ -30,15 +33,6 @@ class KiwoomG:
         logging.info(f"hander login {err_code}")
         if err_code == 0:
             self.connected = True
-
-    def _handler_condition_load(self, ret, msg):
-        if ret == 1:
-            self.condition_loaded = True
-
-    def _handler_tr_condition(self, screen_no, code_list, cond_name, cond_index, next):
-        codes = code_list.split(';')[:-1]
-        self.tr_condition_data = codes
-        self.tr_condition_loaded= True
 
     def _handler_tr(self, screen, rqname, trcode, record, next):
         logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
@@ -86,8 +80,6 @@ class KiwoomG:
     def _set_signals_slots(self):
         self.ocx.OnEventConnect.connect(self._handler_login)
         self.ocx.OnReceiveTrData.connect(self._handler_tr)
-        #self.ocx.OnReceiveConditionVer.connect(self._handler_condition_load)
-        #self.ocx.OnReceiveTrCondition.connect(self._handler_tr_condition)
         self.ocx.OnReceiveMsg.connect(self._handler_msg)
         self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
@@ -384,29 +376,12 @@ class KiwoomG:
         ret = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", [tr_code, record_name, gubun])
         return ret 
 
-
-
-
-
-    def CommKwRqData(self, arr_code, next, code_count, type, rqname, screen):
-        """
-        여러 종목 (한 번에 100종목)에 대한 TR을 서버로 송신하는 메서드
-        :param arr_code: 여러 종목코드 예: '000020:000040'
-        :param next: 0: 처음조회
-        :param code_count: 종목코드의 개수
-        :param type: 0: 주식종목 3: 선물종목
-        :param rqname: 사용자가 설정하는 요청이름
-        :param screen: 화면번호
-        :return:
-        """
-        ret = self.ocx.dynamicCall("CommKwRqData(QString, bool, int, int, QString, QString)", arr_code, next, code_count, type, rqname, screen);
-        return ret
-
-
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
-        lines = parser.read_enc(trcode)
-        self.tr_items = parser.parse_dat(trcode, lines)
+        lines = read_enc(trcode)
+        print(trcode)
+        print(lines)
+        self.tr_items = parse_dat(trcode, lines)
         self.tr_record = kwargs["output"]
         next = kwargs["next"]
 
@@ -419,6 +394,9 @@ class KiwoomG:
         self.received = False
         self.tr_remained = False
 
+        print(trcode)
+        print(args)
+        print(kwargs)
         # request
         self.CommRqData(trcode, trcode, next, "0101")
         while not self.received:
