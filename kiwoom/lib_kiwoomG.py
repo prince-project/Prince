@@ -11,6 +11,7 @@ import os
 
 sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
 from kiwoomG_parser import *
+from kiwoomK_parser import *
 
 logging.basicConfig(filename="log.txt", level=logging.ERROR)
 
@@ -397,6 +398,8 @@ class KiwoomG:
         print(trcode)
         print(args)
         print(kwargs)
+        print(self.tr_items)
+        print(self.tr_record)
         # request
         self.CommRqData(trcode, trcode, next, "0101")
         while not self.received:
