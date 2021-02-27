@@ -379,10 +379,10 @@ class KiwoomG:
 
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
-        lines = read_enc(trcode)
+        lines = read_trinfo(trcode, dir_path)
         print(trcode)
         print(lines)
-        self.tr_items = parse_dat(trcode, lines)
+        self.tr_items = parse_trinfo(trcode, lines)
         self.tr_record = kwargs["output"]
         next = kwargs["next"]
 
