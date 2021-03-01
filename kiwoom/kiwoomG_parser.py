@@ -26,7 +26,7 @@ def parse_trinfo(trcode, lines):
     trinfo = {"trcode": trcode, "input": [], "output": []}
     on_input = False
     on_output = False
-    for i, x in enumerate(raw_info):
+    for i, x in enumerate(lines):
 
         if x[0] == '[%s_INPUT]'%trcode:
             on_input = True
@@ -48,6 +48,7 @@ def parse_trinfo(trcode, lines):
             if len(x) == 1:
                 continue
             elif x[0] == '':
-                trinfo["output"].append(x[1][:-1])
+                #trinfo["output"].append(x[1][:-1])
+                trinfo["output"].append(x[1])
 
     return trinfo

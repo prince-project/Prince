@@ -7,6 +7,10 @@ from pykiwoom import parser
 import pandas as pd
 import time
 import logging
+import os
+
+sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
+from kiwoomK_parser import *
 
 logging.basicConfig(filename="log.txt", level=logging.ERROR)
 
@@ -55,6 +59,10 @@ class Kiwoom:
             for output in self.tr_items['output']:
                 record = list(output.keys())[0]
                 items = list(output.values())[0]
+                print(self.tr_items['output'])
+                print(record)
+                print(items)
+                print(self.tr_record)
                 if record == self.tr_record:
                     break
 
@@ -67,6 +75,8 @@ class Kiwoom:
                 row_data = []
                 for item in items:
                     data = self.GetCommData(trcode, rqname, row, item)
+                    #print(item)
+                    #print(data)
                     row_data.append(data)
                 data_list.append(row_data)
 
@@ -339,6 +349,8 @@ class Kiwoom:
         # initialize
         self.received = False
         self.tr_remained = False
+        #print(self.tr_items)
+        #print(self.tr_record)
 
         # request
         self.CommRqData(trcode, trcode, next, "0101")

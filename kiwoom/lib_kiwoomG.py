@@ -11,7 +11,7 @@ import os
 
 sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
 from kiwoomG_parser import *
-from kiwoomK_parser import *
+#from kiwoomK_parser import *
 
 logging.basicConfig(filename="log.txt", level=logging.ERROR)
 
@@ -380,8 +380,8 @@ class KiwoomG:
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
         lines = read_trinfo(trcode, dir_path)
-        print(trcode)
-        print(lines)
+        #print(trcode)
+        #print(lines)
         self.tr_items = parse_trinfo(trcode, lines)
         self.tr_record = kwargs["output"]
         next = kwargs["next"]
@@ -395,9 +395,9 @@ class KiwoomG:
         self.received = False
         self.tr_remained = False
 
-        print(trcode)
-        print(args)
-        print(kwargs)
+        #print(trcode)
+        #print(args)
+        #print(kwargs)
         print(self.tr_items)
         print(self.tr_record)
         # request
