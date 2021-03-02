@@ -349,7 +349,7 @@ class Kiwoom:
         # initialize
         self.received = False
         self.tr_remained = False
-        #print(self.tr_items)
+        print(self.tr_items)
         #print(self.tr_record)
 
         # request

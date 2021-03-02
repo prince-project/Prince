@@ -52,7 +52,10 @@ class KiwoomG:
                 items = list(output.values())[0]
                 if record == self.tr_record:
                     break
-
+            
+            print(self.tr_items['output'])
+            print(record)
+            print(itmes)
             rows = self.GetRepeatCnt(trcode, rqname)
             if rows == 0:
                 rows = 1
@@ -61,6 +64,7 @@ class KiwoomG:
             for row in range(rows):
                 row_data = []
                 for item in items:
+                    print(item)
                     data = self.GetCommData(trcode, rqname, row, item)
                     row_data.append(data)
                 data_list.append(row_data)
@@ -398,8 +402,8 @@ class KiwoomG:
         #print(trcode)
         #print(args)
         #print(kwargs)
-        print(self.tr_items)
-        print(self.tr_record)
+        #print(self.tr_items)
+        #print(self.tr_record)
         # request
         self.CommRqData(trcode, trcode, next, "0101")
         while not self.received:
