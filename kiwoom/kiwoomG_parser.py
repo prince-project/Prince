@@ -1,3 +1,5 @@
+import numpy  as np
+
 dir_path = "C:/OpenAPIG/Data/"
 
 def read_trinfo(trcode, dir_path):
@@ -48,13 +50,14 @@ def parse_trinfo(trcode, lines):
                 continue
 
         if x[0] == '[%s_OUTPUT]' % trcode:
+            on_input = False
             on_output_single = True
             trinfo["output"].append({})
             continue
 
         if on_output_single:
             if x[0][0:5] == 'Title':
-                single_name = x[0].split("=")[1].strip()
+                single_name = 'single' #x[0].split("=")[1].strip()
                 trinfo["output"][0][single_name] = []
                 continue
             if np.sum([k == '=' for k in x]) == 1:
@@ -62,6 +65,7 @@ def parse_trinfo(trcode, lines):
                 continue                
 
         if x[0][1:16] == '%s_OCCURS'% trcode:
+            on_output_single = False
             on_output_multi = True
             if len(trinfo['output']) == 0:
                 trinfo["output"].append({})
@@ -69,7 +73,7 @@ def parse_trinfo(trcode, lines):
 
         if on_output_multi:
             if x[0][0:5] == 'Title':
-                multi_name = x[0].split("=")[1].strip()
+                multi_name = 'multi' #x[0].split("=")[1].strip()
                 trinfo["output"][0][multi_name] = []
                 continue            
             if np.sum([k == '=' for k in x]) == 1:

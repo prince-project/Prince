@@ -37,7 +37,12 @@ res = kiwoom.GetGlobalFutOpCodeInfoByType(0, "IDX")
 # ESH21
 df = kiwoom.block_request("opt10001",
                           종목코드="ESH21",
-                          output="종목정보조회",
+                          output="single",
+                          next=0)
+
+df = kiwoom.block_request("opt10001",
+                          종목코드="ESH21",
+                          output="multi",
                           next=0)
 print(df)
 

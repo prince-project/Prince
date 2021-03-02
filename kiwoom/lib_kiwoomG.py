@@ -36,6 +36,7 @@ class KiwoomG:
             self.connected = True
 
     def _handler_tr(self, screen, rqname, trcode, record, next):
+        #print('*********************************************')
         logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
         try:
             record = None
@@ -47,15 +48,16 @@ class KiwoomG:
             else:
                 self.tr_remained = False
 
-            for output in self.tr_items['output']:
-                record = list(output.keys())[0]
-                items = list(output.values())[0]
+            for record in self.tr_items['output'][0]:
+                #record = list(output.keys())[0]
+                items = self.tr_items['output'][0][record]
                 if record == self.tr_record:
                     break
             
-            print(self.tr_items['output'])
-            print(record)
-            print(itmes)
+            #print(self.tr_items['output'])
+            #print(record)
+            #print(self.tr_record)
+            #print(items)
             rows = self.GetRepeatCnt(trcode, rqname)
             if rows == 0:
                 rows = 1
@@ -64,7 +66,7 @@ class KiwoomG:
             for row in range(rows):
                 row_data = []
                 for item in items:
-                    print(item)
+                    #print(item)
                     data = self.GetCommData(trcode, rqname, row, item)
                     row_data.append(data)
                 data_list.append(row_data)
@@ -112,6 +114,9 @@ class KiwoomG:
         :param screen: 화면번호 ('0000' 또는 '0' 제외한 숫자값으로 200개로 한정된 값
         :return: None
         """
+        #print("***** CommRqData *****")
+        #print(rqname)
+        #print(trcode)
         self.ocx.dynamicCall("CommRqData(QString, QString, int, QString)", rqname, trcode, next, screen)
 
     def SetInputValue(self, id, value): #checked
@@ -405,7 +410,13 @@ class KiwoomG:
         #print(self.tr_items)
         #print(self.tr_record)
         # request
-        self.CommRqData(trcode, trcode, next, "0101")
+        #print(self.tr_record)
+        if self.tr_record == 'single':
+            #print("***** single *****")
+            self.CommRqData(trcode, trcode, next, "0001")
+        else:
+            self.CommRqData(trcode, trcode, next, "0101")
+
         while not self.received:
             pythoncom.PumpWaitingMessages()
 
