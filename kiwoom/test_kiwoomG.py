@@ -3,8 +3,6 @@ import os
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
-
-
 sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
 from lib_kiwoomG import *
 
@@ -34,7 +32,7 @@ futures_code_list = kiwoom.GetGlobalFutureCodelist("ES")
 
 res = kiwoom.GetGlobalFutOpCodeInfoByType(0, "IDX")
 
-# ESH21
+# opt10001 - 종목정보조회
 df = kiwoom.block_request("opt10001",
                           종목코드="ESH21",
                           output="single",
@@ -44,13 +42,64 @@ df = kiwoom.block_request("opt10001",
                           종목코드="ESH21",
                           output="multi",
                           next=0)
-print(df)
 
-df = kiwoom.block_request("opt10008",
-                          종목코드="ES",
-                          시간단위="0",
-                          output="해외선물전체시세조회",
+# opt10005 - 관심종목조회
+df = kiwoom.block_request("opt10005",
+                          종목코드="ESH21",
+                          output="multi",
                           next=0)
-print(df.head())
+
+# opt10006 - 상품별현재가조회
+df = kiwoom.block_request("opt10006",
+                          상품코드="IDX",
+                          output="multi",
+                          next=0)
+
+# opt10007 - 거래소별현재가조회
+df = kiwoom.block_request("opt10007",
+                          거래소코드="CME",
+                          output="multi",
+                          next=0)
+
+# opt10009 - 전일대비등락율상위조회 
+df = kiwoom.block_request("opt10009",
+                          상품구분="",
+                          정렬구분="1",
+                          output="multi",
+                          next=0)
+
+# opt10010 - 당일거래량상위조회 
+df = kiwoom.block_request("opt10010",
+                          상품구분="",
+                          output="multi",
+                          next=0)
+
+# opt10011 - 체결데이타조회 
+df = kiwoom.block_request("opt10011",
+                          종목코드="ESH21",
+                          시간단위="00",
+                          output="multi",
+                          next=0)
+
+# opt10012 - 분데이타조회 
+df = kiwoom.block_request("opt10012",
+                          종목코드="ESH21",
+                          시간단위="60",
+                          output="multi",
+                          next=0)
+
+# opt10013 - 일별데이타조회 
+df = kiwoom.block_request("opt10013",
+                          종목코드="ESH21",
+                          시간단위="0",
+                          output="multi",
+                          next=0)
+
+# opt10014 - 종목시작시간 
+df = kiwoom.block_request("opt10014",
+                          종목코드="ESH21",
+                          output="single",
+                          next=0)
+
 
 kiwoom.CommTerminate()
