@@ -32,6 +32,10 @@ futures_code_list = kiwoom.GetGlobalFutureCodelist("ES")
 
 res = kiwoom.GetGlobalFutOpCodeInfoByType(0, "IDX")
 
+#------------------------------
+# sample
+#------------------------------
+
 # opt10001 - 종목정보조회
 df = kiwoom.block_request("opt10001",
                           종목코드="ESH21",
@@ -87,6 +91,26 @@ df = kiwoom.block_request("opt10012",
                           시간단위="60",
                           output="multi",
                           next=0)
+                          
+### 연속조회
+dfs = []
+df = kiwoom.block_request("opt10012",
+                          종목코드="ESH21",
+                          시간단위="1",
+                          output="multi",
+                          next=0)
+
+while kiwoom.tr_remained:
+    df = kiwoom.block_request("opt10012",
+                          종목코드="ESH21",
+                          시간단위="1",
+                          output="multi",
+                          next=2)
+    dfs.append(df)
+    time.sleep(1)
+
+df = pd.concat(dfs)
+df.to_excel("005930.xlsx")
 
 # opt10013 - 일별데이타조회 
 df = kiwoom.block_request("opt10013",
@@ -101,5 +125,30 @@ df = kiwoom.block_request("opt10014",
                           output="single",
                           next=0)
 
+# 매수/매도
+#지정가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0.7900”, “2”, “”)
+#시장가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0”, “1”, “”)
+
+## 계좌
+account = kiwoom.GetLoginInfo("ACCNO")[0]
+kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESH21", 1, "0", "", "1", "")
+
+## 삼성전자, 10주, 시장가주문 매수
+for i in range(10):
+    kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESH21", 1, "0", "1", "")
+    time.sleep(0.2)
+    print(i, "매수 완료")
+
+# 삼성전자, 10주, 시장가주문 매도
+kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, "005930", 10, 0, "03", "")
 
 kiwoom.CommTerminate()
+
+
+#------------------------------
+# test code
+#------------------------------
+
+open_time = kiwoom.block_request("opt10014", 종목코드="ESH21", output="single", next=0).iloc[:,1].values[0]
+open_time = pd.Timestamp(open_time)
+

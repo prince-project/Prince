@@ -41,7 +41,12 @@ class KiwoomG:
         try:
             record = None
             items = None
-
+            #print(self.tr_remained)
+            print(self)
+            print(screen)
+            print(rqname)
+            print(record)
+            print(next)
             # remained data
             if next == '2':
                 self.tr_remained = True
@@ -189,19 +194,15 @@ class KiwoomG:
         주문을 서버로 전송하는 메서드
         시장가 주문시 주문단가는 0으로 입력해야 함 (가격을 입력하지 않음을 의미)
         :param rqname: 사용자가 임의로 지정할 수 있는 요청 이름
-        :param screen: 화면번호 ('0000' 또는 '0' 제외한 숫자값으로 200개로 한정된 값
-        :param accno: 계좌번호 10자리
-        :param order_type: 1: 신규매도, 2: 신규매수, 3: 매도취소, 4: 매수취소, 5: 매도정정, 6: 매수정정
+        :param screen: 화면번호[4] (1~9999 :숫자값으로만 가능)
+        :param accno: 계좌번호[10]
+        :param order_type: 주문유형 (1:신규매도, 2:신규매수, 3:매도취소, 4:매수취소, 5:매도정정, 6:매수정정)
         :param code: 종목코드
         :param quantity: 주문수량
         :param price: 주문단가
         :param stop: Stop단가
-        :param hoga: 00: 지정가, 03: 시장가,
-                     05: 조건부지정가, 06: 최유리지정가, 07: 최우선지정가,
-                     10: 지정가IOC, 13: 시장가IOC, 16: 최유리IOC,
-                     20: 지정가FOK, 23: 시장가FOK, 26: 최유리FOK,
-                     61: 장전시간외종가, 62: 시간외단일가, 81: 장후시간외종가
-        :param order_no: 원주문번호로 신규 주문시 공백, 정정이나 취소 주문시에는 원주문번호를 입력
+        :param hoga: 거래구분 (1:시장가, 2:지정가, 3:STOP, 4:STOP LIMIT)
+        :param order_no: 원주문번호
         :return:
         ex)
         지정가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0.7900”, “2”, “”);
@@ -209,7 +210,7 @@ class KiwoomG:
         매수 정정 - openApi.SendOrder(“RQ_1”,“0101”, “5015123410”, 6, “6AH16”, 10, “0.7800”, “0”, “200060”);
         매수 취소 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 4, “6AH16”, 10, “0”, “0”, “200061”);
         """
-        ret = self.ocx.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, int, QString, QString)",
+        ret = self.ocx.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, QString, QString, QString, QString)",
                                    [rqname, screen, accno, order_type, code, quantity, price, stop, hoga, order_no])
         return ret
 

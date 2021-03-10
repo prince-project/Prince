@@ -140,7 +140,6 @@ df = kiwoom.block_request("opt10081",
                           수정주가구분=1,
                           output="주식일봉차트조회",
                           next=0)
-print(df.head())
 dfs.append(df)
 
 while kiwoom.tr_remained:

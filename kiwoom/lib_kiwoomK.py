@@ -49,7 +49,11 @@ class Kiwoom:
         try:
             record = None
             items = None
-
+            print(self)
+            print(screen)
+            print(rqname)
+            print(record)
+            print(next)
             # remained data
             if next == '2':
                 self.tr_remained = True
@@ -59,10 +63,10 @@ class Kiwoom:
             for output in self.tr_items['output']:
                 record = list(output.keys())[0]
                 items = list(output.values())[0]
-                print(self.tr_items['output'])
-                print(record)
-                print(items)
-                print(self.tr_record)
+                #print(self.tr_items['output'])
+                #print(record)
+                #print(items)
+                #print(self.tr_record)
                 if record == self.tr_record:
                     break
 
@@ -349,7 +353,7 @@ class Kiwoom:
         # initialize
         self.received = False
         self.tr_remained = False
-        print(self.tr_items)
+        #print(self.tr_items)
         #print(self.tr_record)
 
         # request
