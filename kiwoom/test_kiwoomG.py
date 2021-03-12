@@ -19,6 +19,8 @@ user_name = kiwoom.GetLoginInfo("USER_NAME")            # 사용자명
 keyboard = kiwoom.GetLoginInfo("KEY_BSECGB")            # 키보드보안 해지여부
 firewall = kiwoom.GetLoginInfo("FIREW_SECGB")           # 방화벽 설정 여부
 
+kiwoom.CommTerminate()
+
 print(account_num)
 print(accounts)
 print(user_id)
@@ -126,25 +128,50 @@ df = kiwoom.block_request("opt10014",
                           next=0)
 
 # 매수/매도
-#지정가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0.7900”, “2”, “”)
-#시장가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0”, “1”, “”)
 
 ## 계좌
 account = kiwoom.GetLoginInfo("ACCNO")[0]
+## 시장가 매수
 kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESH21", 1, "0", "", "1", "")
+## 시장가매도
+kiwoom.SendOrder("시장가매도", "0101", account, 1, "ESH21", 1, "0", "", "1", "")
+## 지정가매수 
+kiwoom.SendOrder("지정가매수", "0101", account, 2, "ESH21", 1, "3900.00", "", "2", "")
+## 매수취소
+df = kiwoom.block_request("opw30002",
+                          계좌번호="%s"%account,
+                          비밀번호="0000",
+                          종목코드="ESH21",
+                          통화코드="USD",
+                          매도수구분="2", #매도-1, 매수-2
+                          output="multi",
+                          next=0)
+kiwoom.SendOrder("매수취소", "0101", account, 4, "ESH21", 1, "0", "", "0", df.iloc[:,0].values[0][-9:])
 
-## 삼성전자, 10주, 시장가주문 매수
-for i in range(10):
-    kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESH21", 1, "0", "1", "")
-    time.sleep(0.2)
-    print(i, "매수 완료")
+# 매수/매도
+df = kiwoom.block_request("opw40001",
+                          계좌번호="%s"%account,
+                          비밀번호="0000",
+                          비밀번호입력매체="00",
+                          시작일자="20210301",
+                          종료일자="20210331",
+                          통화코드="USD",
+                          output="multi",
+                          next=0)
 
-# 삼성전자, 10주, 시장가주문 매도
-kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, "005930", 10, 0, "03", "")
+trcode='opw30002'
+trcode = 'opw40001'
+lines = read_trinfo(trcode, dir_path)
+tr_items = parse_trinfo(trcode, lines)
 
-kiwoom.CommTerminate()
-
-
+[opw40001_INPUT]
+Title =기간손익내역조회
+	계좌번호		=	10	,	-1
+	비밀번호		=	64	,	-1
+	비밀번호입력매체 	= 	2	,	-1
+	시작일자		=	8	,	-1
+	종료일자		=	8	,	-1
+	통화코드		=	3	,	-1
 #------------------------------
 # test code
 #------------------------------
