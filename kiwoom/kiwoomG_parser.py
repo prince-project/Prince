@@ -31,8 +31,7 @@ def parse_trinfo(trcode, lines):
     on_output_multi = False
 
     for i, x in enumerate(lines):
-        #print(i)
-        #print(x[0])
+
         if x[0] == '[%s_INPUT]'%trcode:
             on_input = True
             trinfo["input"].append({})

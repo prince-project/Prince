@@ -92,13 +92,6 @@ df = kiwoom.block_request("opt10011",
                           next=0)
 
 # opt10012 - 분데이타조회 
-df = kiwoom.block_request("opt10012",
-                          종목코드="ESH21",
-                          시간단위="10",
-                          output="multi",
-                          next=0)
-                          
-### 연속조회
 dfs = []
 df = kiwoom.block_request("opt10012",
                           종목코드="ESH21",
@@ -166,7 +159,7 @@ df = kiwoom.block_request("opw30002",
                           next=0)
 kiwoom.SendOrder("매수취소", "0101", account, 4, "ESH21", 1, "0", "", "0", df.iloc[:,0].values[0][-9:])
 
-# 매수/매도
+# 기간손익내역조회
 df = kiwoom.block_request("opw40001",
                           계좌번호="%s"%account,
                           비밀번호="0000",
@@ -177,19 +170,6 @@ df = kiwoom.block_request("opw40001",
                           output="multi",
                           next=0)
 
-trcode='opw30002'
-trcode = 'opw40001'
-lines = read_trinfo(trcode, dir_path)
-tr_items = parse_trinfo(trcode, lines)
-
-[opw40001_INPUT]
-Title =기간손익내역조회
-	계좌번호		=	10	,	-1
-	비밀번호		=	64	,	-1
-	비밀번호입력매체 	= 	2	,	-1
-	시작일자		=	8	,	-1
-	종료일자		=	8	,	-1
-	통화코드		=	3	,	-1
 #------------------------------
 # test code
 #------------------------------
