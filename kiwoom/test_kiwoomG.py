@@ -104,7 +104,7 @@ df = kiwoom.block_request("opt10012",
                           종목코드="ESH21",
                           시간단위="1",
                           output="multi",
-                          next=0)
+                          next="")
 dfs.append(df)
 
 while kiwoom.tr_remained:
@@ -112,7 +112,7 @@ while kiwoom.tr_remained:
                           종목코드="ESH21",
                           시간단위="1",
                           output="multi",
-                          next=self.next)
+                          next=kiwoom.next)
     dfs.append(df)
     time.sleep(1)
 
@@ -125,7 +125,7 @@ df = kiwoom.block_request("opt10013",
                           종목코드="ESH21",
                           시간단위="0",
                           output="multi",
-                          next=0)
+                          next="")
 dfs.append(df)
 
 while kiwoom.tr_remained:
@@ -133,7 +133,7 @@ while kiwoom.tr_remained:
                           종목코드="ESH21",
                           시간단위="1",
                           output="multi",
-                          next=2)
+                          next=kiwoom.next)
     dfs.append(df)
     time.sleep(1)
 
