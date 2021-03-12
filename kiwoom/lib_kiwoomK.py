@@ -49,10 +49,10 @@ class Kiwoom:
         try:
             record = None
             items = None
-            print(self)
-            print(screen)
-            print(rqname)
-            print(record)
+            #print(self)
+            #print(screen)
+            #print(rqname)
+            #print(record)
             print(next)
             # remained data
             if next == '2':

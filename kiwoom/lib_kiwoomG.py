@@ -23,6 +23,7 @@ class KiwoomG:
         self.received = False               # for tr event
         self.tr_items = None                # tr input/output items
         self.tr_data = None                 # tr output data
+        self.next = "0"
         self.tr_record = None
         self.tr_remained = False
         self._set_signals_slots()
@@ -37,22 +38,27 @@ class KiwoomG:
 
     def _handler_tr(self, screen, rqname, trcode, record, next):
         #print('*********************************************')
+        print(next)
         logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
         try:
             record = None
             items = None
             #print(self.tr_remained)
-            print(self)
-            print(screen)
-            print(rqname)
-            print(record)
+            #print(self)
+            #print(screen)
+            #print(rqname)
+            #print(record)
             print(next)
+            #print(len(next))
+            #if next == 'None':
+            #    print("******")
             # remained data
-            if next == '2':
+            if len(next) > 1:
                 self.tr_remained = True
             else:
                 self.tr_remained = False
 
+            print(self.tr_remained)
             for record in self.tr_items['output'][0]:
                 #record = list(output.keys())[0]
                 items = self.tr_items['output'][0][record]
@@ -412,11 +418,12 @@ class KiwoomG:
         #print(self.tr_record)
         # request
         #print(self.tr_record)
+        print("##### %s"%next)
         if self.tr_record == 'single':
             #print("***** single *****")
-            self.CommRqData(trcode, trcode, next, "0001")
+            self.CommRqData(trcode, trcode, self.next, "0001")
         else:
-            self.CommRqData(trcode, trcode, next, "0101")
+            self.CommRqData(trcode, trcode, self.next, "0101")
 
         while not self.received:
             pythoncom.PumpWaitingMessages()

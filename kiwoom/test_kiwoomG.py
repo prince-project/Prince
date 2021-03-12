@@ -5,6 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt 
 sys.path.append(os.path.abspath('C:\GitHub\kiwoom\kiwoom'))
 from lib_kiwoomG import *
+from tabulate import tabulate
+
+def _table(df):
+    return tabulate(df, headers = 'keys', tablefmt = 'pipe')
 
 kiwoom = KiwoomG()
 kiwoom.CommConnect(block=True)
@@ -90,7 +94,7 @@ df = kiwoom.block_request("opt10011",
 # opt10012 - 분데이타조회 
 df = kiwoom.block_request("opt10012",
                           종목코드="ESH21",
-                          시간단위="60",
+                          시간단위="10",
                           output="multi",
                           next=0)
                           
@@ -101,9 +105,31 @@ df = kiwoom.block_request("opt10012",
                           시간단위="1",
                           output="multi",
                           next=0)
+dfs.append(df)
 
 while kiwoom.tr_remained:
     df = kiwoom.block_request("opt10012",
+                          종목코드="ESH21",
+                          시간단위="1",
+                          output="multi",
+                          next=self.next)
+    dfs.append(df)
+    time.sleep(1)
+
+df = pd.concat(dfs)
+#df.to_excel("005930.xlsx")
+
+# opt10013 - 일별데이타조회 
+dfs = []
+df = kiwoom.block_request("opt10013",
+                          종목코드="ESH21",
+                          시간단위="0",
+                          output="multi",
+                          next=0)
+dfs.append(df)
+
+while kiwoom.tr_remained:
+    df = kiwoom.block_request("opt10013",
                           종목코드="ESH21",
                           시간단위="1",
                           output="multi",
@@ -112,14 +138,6 @@ while kiwoom.tr_remained:
     time.sleep(1)
 
 df = pd.concat(dfs)
-df.to_excel("005930.xlsx")
-
-# opt10013 - 일별데이타조회 
-df = kiwoom.block_request("opt10013",
-                          종목코드="ESH21",
-                          시간단위="0",
-                          output="multi",
-                          next=0)
 
 # opt10014 - 종목시작시간 
 df = kiwoom.block_request("opt10014",
@@ -154,8 +172,8 @@ df = kiwoom.block_request("opw40001",
                           비밀번호="0000",
                           비밀번호입력매체="00",
                           시작일자="20210301",
-                          종료일자="20210331",
-                          통화코드="USD",
+                          종료일자="20210312",
+                          통화코드="",
                           output="multi",
                           next=0)
 

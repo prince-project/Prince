@@ -31,8 +31,8 @@ def parse_trinfo(trcode, lines):
     on_output_multi = False
 
     for i, x in enumerate(lines):
-        print(i)
-        print(x[0])
+        #print(i)
+        #print(x[0])
         if x[0] == '[%s_INPUT]'%trcode:
             on_input = True
             trinfo["input"].append({})
@@ -43,7 +43,7 @@ def parse_trinfo(trcode, lines):
                 input_name = x[0].split("=")[1].strip()
                 trinfo["input"][0][input_name] = []
                 continue
-            if np.sum([k == '=' for k in x]) == 1:
+            if np.sum([k == '=' for k in x]) == 1 or np.sum([k == '= ' for k in x]) == 1:
                 trinfo["input"][0][input_name].append(x[0])
                 continue
 
