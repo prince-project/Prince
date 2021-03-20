@@ -3,8 +3,8 @@ import pprint
 
 token = "1385119781:AAExma3hOSbMJ4AsMJVEgx5NDGJANZfcN1Y"
 id =  34316367
-#token = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
-#id = 1698192054
+token = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
+id = 1524661832
 bot = telepot.Bot(token)
 bot.sendMessage(chat_id=id, text="Prince Project Under Construction")
 
@@ -17,7 +17,7 @@ requests.get(url, params = {"chat_id" : '34316367', "text" : "Prince Project Und
 
 
 token = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
-id = 1698192054
+#id = 1698192054
 bot = telepot.Bot(token)
 resp = bot.getUpdates()
 pprint.pprint(resp)
