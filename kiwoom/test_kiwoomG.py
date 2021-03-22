@@ -115,7 +115,7 @@ df = pd.concat(dfs)
 # opt10013 - 일별데이타조회 
 dfs = []
 df = kiwoom.block_request("opt10013",
-                          종목코드="ESH21",
+                          종목코드="ESM21",
                           시간단위="0",
                           output="multi",
                           next="")
@@ -134,7 +134,7 @@ df = pd.concat(dfs)
 
 # opt10014 - 종목시작시간 
 df = kiwoom.block_request("opt10014",
-                          종목코드="ESH21",
+                          종목코드="MESM21",
                           output="single",
                           next=0)
 

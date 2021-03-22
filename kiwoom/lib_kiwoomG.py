@@ -37,25 +37,40 @@ class KiwoomG:
             self.connected = True
 
     def _handler_tr(self, screen, rqname, trcode, record, next):
-
+        #print('*********************************************')
+        #print(next)
         logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
         try:
             record = None
             items = None
             self.next = next
-
+            print('*** %s ***' % self.next)
+            #print(self.tr_remained)
+            #print(self)
+            #print(screen)
+            #print(rqname)
+            #print(record)
+            #print(next)
+            #print(len(next))
+            #if next == 'None':
+            #    print("******")
             # remained data
             if len(next) > 1:
                 self.tr_remained = True
             else:
                 self.tr_remained = False
 
+            #print(self.tr_remained)
             for record in self.tr_items['output'][0]:
                 #record = list(output.keys())[0]
                 items = self.tr_items['output'][0][record]
                 if record == self.tr_record:
                     break
             
+            #print(self.tr_items['output'])
+            #print(record)
+            #print(self.tr_record)
+            #print(items)
             rows = self.GetRepeatCnt(trcode, rqname)
             if rows == 0:
                 rows = 1
@@ -64,6 +79,7 @@ class KiwoomG:
             for row in range(rows):
                 row_data = []
                 for item in items:
+                    #print(item)
                     data = self.GetCommData(trcode, rqname, row, item)
                     row_data.append(data)
                 data_list.append(row_data)
@@ -111,6 +127,9 @@ class KiwoomG:
         :param screen: 화면번호 ('0000' 또는 '0' 제외한 숫자값으로 200개로 한정된 값
         :return: None
         """
+        #print("***** CommRqData *****")
+        #print(rqname)
+        #print(trcode)
         self.ocx.dynamicCall("CommRqData(QString, QString, QString, QString)", rqname, trcode, next, screen)
 
     def SetInputValue(self, id, value): #checked
@@ -379,7 +398,8 @@ class KiwoomG:
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
         lines = read_trinfo(trcode, dir_path)
-
+        #print(trcode)
+        #print(lines)
         self.tr_items = parse_trinfo(trcode, lines)
         self.tr_record = kwargs["output"]
         next = kwargs["next"]
@@ -393,12 +413,20 @@ class KiwoomG:
         self.received = False
         self.tr_remained = False
 
+        #print(trcode)
+        #print(args)
+        #print(kwargs)
+        #print(self.tr_items)
+        #print(self.tr_record)
         # request
+        #print(self.tr_record)
+        #print("11111 %s" % self.next)
         if self.tr_record == 'single':
+            #print("***** single *****")
             self.CommRqData(trcode, trcode, next, "0101")
         else:
             self.CommRqData(trcode, trcode, next, "0101")
-            
+        #print("22222 %s" % self.next)
         while not self.received:
             pythoncom.PumpWaitingMessages()
 
