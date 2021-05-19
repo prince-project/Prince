@@ -327,6 +327,68 @@ class Hana:
         """
         return self.ocx.dynamicCall("RequestTran(int, QString, QString, QString, QString, QString, QString, int)",  nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount)
 
+    def GetTranOutputRowCnt(self, strTrCode, strRecName):
+        """
+        22
+        원형: LONG GetTranOutputRowCnt(BSTR strTrCode, BSTR strRecName)
+        기능: Tran조회응답 데이터 건수 반환
+        호출: Tran조회응답 이벤트(OnGetTranData) 안에서만 호출한다.
+        인자: BSTR strTrCode - 서비스 Tr코드(Tran 리소스파일(*.res)파일의 'TR_CODE=' 항목)
+            BSTR strRecName - Input 레코드명(Tran 리소스파일(*.res)파일의 'REC_NAME=' 항목) 
+        반환: LONG
+            0: 데이터 없음, 0보다 큰 정수: 데이터 건수
+        """
+        return self.ocx.dynamicCall("GetTranOutputRowCnt(QString, QString)",  strTrCode, strRecName)
+
+    def GetTranOutputData(self, strTrCode, strRecName, strItemName, nRow):
+        """
+        23
+        원형: BSTR GetTranOutputData(BSTR strTrCode, BSTR strRecName, BSTR strItemName, LONG nRow)
+        기능: Tran조회 항목별 응답데이터 반환
+        호출: Tran조회 응답 이벤트(OnGetTranData) 안에서만 호출한다.
+        인자: BSTR strTrCode
+              BSTR strRecName
+              BSTR strItemName
+              LONG nRow
+        반환: BSTR
+        """
+        return self.ocx.dynamicCall("GetTranOutputData(QString, QString, QString, int)",  strTrCode, strRecName, strItemName, nRow)
+
+    def SetTranInputArrayCnt(self, nRqId, strTrCode, strRecName, nRecCnt):
+        """
+        24
+        원형: LONG SetTranInputArrayCnt(LONG nRqId, BSTR strTrCode, BSTR strRecName, LONG nRecCnt)
+        기능: Tran조회 입력 데이터 건수 설정
+        호출: RequestTran 호출 전에 통신 Input데이터 건수 입력 목적으로 호출한다.
+        인자: LONG nRqId
+              BSTR strTrCode
+              BSTR strRecName : 입력 레코드명
+              LONG nRecCnt : 데이터 입력 건수
+        반환: LONG
+              0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("SetTranInputArrayCnt(int, QString, QString, int)",  nRqId, strTrCode, strRecName, nRecCnt)
+
+    def SetTranInputArrayData(self, nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex):
+        """
+        25
+        원형: LONG SetTranInputArrayData(LONG nRqId, BSTR strTrCode, BSTR strRecName, BSTR strItem, BSTR strValue, LONG nArrayIndex)
+        기능: Tran조회 복수건 입력
+        호출: RequestTran 호출 전에 통신 복수건 Input데이터 입력 목적으로 호출한다.
+        인자: LONG nRqId
+              BSTR strTrCode
+              BSTR strRecName : 입력 레코드명
+              BSTR strItem : 항목명
+              BSTR strValue : 입력값
+              LONG nArrayIndex : 레코드 인덱스(0부터 시작)
+        반환: LONG
+              0 : 실패, 1 : 성공
+        """
+        return self.ocx.dynamicCall("SetTranInputArrayData(int, QString, QString, QString, QString, int)",  nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex)
+
+
+
+
 
     def CommConnect(self, block=True, login_type=0): # checked
         """
