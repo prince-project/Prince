@@ -104,8 +104,230 @@ class Hana:
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
     #-------------------------------------------------------------------------------------------------------------------
-    # OpenAPI+ 메서드
+    # API 메소드 상세
     #-------------------------------------------------------------------------------------------------------------------
+
+    ## 통신 관련
+    def CommInit(self):
+        """
+        01
+        원형: LONG CommInit(void)
+        기능: 통신모듈 초기화 및 연결
+        호출: 로그인 처리전에 호출한다.
+        인자: void
+              없음
+        반환: LONG
+              0: 성공, 음수: 오류
+        """
+        return self.ocx.dynamicCall("CommInit()")
+
+    def CommTerminate(self, bSocketClose):
+        """
+        02
+        원형: void CommTerminate(LONG bSocketClose)
+        기능: 연결 해제
+        호출: 로그아웃 처리 이후에 호출한다.
+        인자: LONG bSocketClose
+              1: 통신모듈 종료 및 연결 해제, 0 : 통신모듈과 연결 해제
+        반환: void
+              없음
+        """
+        self.ocx.dynamicCall("CommTerminate(int)", bSocketClose)
+
+    def CommGetConnectState(self):
+        """
+        03
+        원형: LONG CommGetConnectState(void)
+        기능: 통신연결 상태 확인
+        호출: CommInit 메소드 호출 후 통신연결 상태 확인을 위해 호출한다.
+        인자: void	
+              없음
+        반환: LONG 
+              0: 연결 끊김, 1: 연결
+        """
+        return self.ocx.dynamicCall("CommGetConnectState()")
+
+    def CommLogin(self, sUserID, sPwd, sCertPwd):
+        """
+        04
+        원형: LONG CommLogin(BSTR sUserID, BSTR sPwd, BSTR sCertPwd)
+        기능: 로그인 처리
+        호출: CommInit 호출 이후 통신 연결이 완료된 이후에 호출한다.
+        인자: BSTR sUserID - 로그인 ID
+              BSTR sPwd - 로그인 비밀번호
+              BSTR sCertPwd	- 공인인증 비밀번호
+        반환: LONG
+              0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("CommLogin(QString, QString, QString)", sUserID, sPwd, sCertPwd)
+
+    def CommLogout(self, sUserID):
+        """
+        05
+        원형: LONG CommLogout(BSTR sUserID)
+        기능: 로그아웃 처리
+        호출: CommTerminate 호출 전에 호출한다.
+        인자: BSTR sUserID - 로그인 ID
+        반환: LONG
+            0: 성공
+        """
+        return self.ocx.dynamicCall("CommLogout(QString)", sUserID)
+
+    def GetLoginState(self):
+        """
+        06
+        원형: LONG GetLoginState(void)
+        기능: 로그인상태 확인
+        호출: CommLogin 메소드 호출 이후, 로그인 상태 확인 목적으로 호출한다.
+        인자: void
+              없음
+        반환: LONG
+            0: 로그아웃, 1: 로그인
+        """
+        return self.ocx.dynamicCall("GetLoginState()")
+
+    def SetLoginMode(self, nOption, nMode):
+        """
+        07
+        원형: void SetLoginMode(LONG nOption, LONG nMode)
+        기능: 로그인모드 설정
+        호출: CommLogin 메소드 호출전, 로그인 접속 설정을 한다..
+        인자: LONG nOption
+            0: 모의투자 구분, 1: 시세전용 구분
+            LONG nMode	
+            if nOption(0) then  0:실거래, 1:국내모의, 2:해외모의
+            if nOption(1) then  0:공인인증, 1:시세전용
+        반 환: void
+        예) m_commAgentCtrl.SetLoginMode(0, 0) //실거래 로그인
+            m_commAgentCtrl.SetLoginMode(0, 1) //국내모의 로그인
+            m_commAgentCtrl.SetLoginMode(1, 1) //시세전용 로그인(인증서X)
+        """
+        self.ocx.dynamicCall("SetLoginMode(int, int)", nOption, nMode)
+
+    def GetLoginMode(self, nOption):
+        """
+        08
+        원형: LONG GetLoginMode(LONG nOption)
+        기능: 로그인상태 확인
+        호출: CommLogin 메소드 호출 이후, 로그인 상태 확인 목적으로 호출한다.
+        인자: LONG nOption
+            0: 모의투자 체크, 1: 시제전용, 2: 직원/고객 로그인
+        반환: LONG	
+            -1: 실패, 
+            성공: -1보다 큰 양수
+        """
+        return self.ocx.dynamicCall("GetLoginMode(int)", nOption)
+
+    ## 리소스관련
+    def LoadTranResource(self, strFilePath):
+        """
+        10
+        원형: LONG LoadTranResource(BSTR strFilePath)
+        기능: Tran조회 I/O Block 정보 리소스파일 로드
+        호출: Tran조회 시에 반드시 리소스파일이 에이전트 컨트롤에 적재되어 있어야한다.
+        인자: BSTR strFilePath	
+            Tran I/O Block 정보 리소스파일(*.res) 경로
+        반환: LONG	
+            0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("LoadTranResource(QString)", strFilePath)
+
+    def LoadRealResource(self, strFilePath):
+        """
+        11
+        원형: LONG LoadRealResource(BSTR strFilePath)
+        기능: 실시간 Block 정보 리소스파일 로드
+        호출: 실시간 등록 시에 반드시 리소스파일이 에이전트 컨트롤에 적재되어 있어야한다.
+        인자: BSTR strFilePath	
+            실시간Block정보 리소스파일(*.res) 경로
+        반환: LONG	
+            0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("LoadRealResource(QString)", strFilePath)
+
+    ## 통신조회관련공통
+    def CreateRequestID(self):
+        """
+        15
+        원형: LONG CreateRequestID(void)
+        기능: 조회고유ID 생성(Request ID)
+        호출: Tran/FID조회 시, RQ ID를 먼저 생성한다.
+        인자: Void
+            없음
+        반환: LONG 신규 RQ ID 반환
+            음수: 실패, 2보다 큰 정수: 성공)
+        """
+        return self.ocx.dynamicCall("CreateRequestID()")
+
+    def GetCommRecvOptionValue(self, nOptionType):
+        """
+        16
+        원형: BSTR GetCommRecvOptionValue(LONG nOptionType)
+        기능: 조회응답 부가정보/옵션값 반환
+        호출: Tran/FID조회(OnGetTranData, OnGetFidData) 응답 이벤트 안에서만 호출한다.
+        인자: LONG nOptionType
+            CommRecvOpt::TranCode= 0 : Tr코드
+            CommRecvOpt::PrevNextCode= 1 : 연속데이타구분 
+            (0:없음, 1:이전, 2:다음, 3:이전/다음)
+            CommRecvOpt::PrevNextKey= 2 : 연속조회키
+            CommRecvOpt::MsgCode= 3 : 메시지코드
+            CommRecvOpt::Msg= 4 : 메시지
+            CommRecvOpt::SubMsgCode= 5 : 부가메시지코드
+            CommRecvOpt::SubMsg=6 : 부가메시지
+        반환: BSTR nOptionType에 대응하는 문자열값 반환
+        """
+        return self.ocx.dynamicCall("GetCommRecvOptionValue(int)", nOptionType)
+
+    def ReleaseRqId(self, nRqId):
+        """ 
+        17   
+        원형: LONG ReleaseRqId(LONG nRqId)
+        기능: 조회고유ID(Request ID) 할당 해제
+        호출: CreateRequestID 함수로 생성(할당)한RQ ID를 해제할 때 사용.
+        인자: LONG nRqId	
+            CreateRequestID로 생성(할당) 받은 RQ ID
+        반환: void
+            없음
+        """
+        self.ocx.dynamicCall("ReleaseRqId(int)", nRqId)
+
+    ## Tran조회관련
+    def SetTranInputData(self, nRqId, strTrCode, strRecName, strItem, strValue):
+        """
+        20
+        원형: LONG SetTranInputData(LONG nRqId, BSTR strTrCode, BSTR strRecName, BSTR strItem, BSTR strValue)
+        기능: Tran조회, 항목별 입력값을 입력한다
+        호출: RequestTran 호출 전에 통신 Input데이터 입력 목적으로 호출한다.
+        인자: LONG nRqId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR strTrCode - 서비스Tr코드(Tran 리소스파일(*.res)파일의 'TR_CODE=' 항목)
+              BSTR strRecName - Input레코드명(Tran 리소스파일(*.res)파일의 'REC_NAME=' 항목)
+              BSTR strItem - Input항목명(Tran 리소스파일(*.res)파일의 'ITEM=' 항목)
+              BSTR strValue	- Input항목에 대응하는 입력값
+        반환: LONG
+            0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("SetTranInputData(int, QString, QString, QString, QString)",  nRqId, strTrCode, strRecName, strItem, strValue)
+
+    def RequestTran(self, nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount):
+        """
+        21
+        원형: LONG RequestTran(LONG nRqId, BSTR sTrCode, BSTR sIsBenefit, BSTR sPrevOrNext, BSTR sPrevNextKey, BSTR sScreenNo, BSTR sTranType, LONG nRequestCount)
+        기능: Tran조회 요청
+        호출: 서버에 Tran조회 요청 시 호출
+        인자: LONG nRqId - 조회고유ID(Request ID) - (CreateRequestID메소드로 생성)
+              BSTR sTrCode - 서비스Tr코드(Tran 리소스파일(*.res)파일의 'TR_CODE=' 항목)
+              BSTR sIsBenefit - 수익계좌여부("Y", "N")
+              BSTR sPrevOrNext - 연속조회구분 ("0" :일반조회, "1" : 연속조회 첫 조회, "2" : 이전조회, "3" : 다음조회)
+              BSTR sPrevNextKey - 다음/이전 조회 시 연속구분이 되는 키값 입력(조회응답으로 내려 온다.)
+              BSTR sScreenNo - 화면번호(ex-> "9999")
+              BSTR sTranType - Q': 조회,'U': Update (보통 조회는 'Q', 주문 등은 'U'를 입력한다.)
+              LONG RequestCount - 조회 응답으로 받을 최대 데이터 건수(Maxium : 9999)
+        반환: LONG
+            음수: 실패, 0보다 큰 정수: 성공
+        """
+        return self.ocx.dynamicCall("RequestTran(int, QString, QString, QString, QString, QString, QString, int)",  nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount)
+
+
     def CommConnect(self, block=True, login_type=0): # checked
         """
         로그인 윈도우를 실행합니다.
@@ -154,11 +376,11 @@ class Hana:
         data = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, index, item)
         return data.strip()
 
-    def CommTerminate(self): #checked
-        """
-        OpenAPI의 서버 접속을 해제한다
-        """
-        self.ocx.dynamicCall("CommTerminate()")
+    #def CommTerminate(self): #checked
+    #    """
+    #    OpenAPI의 서버 접속을 해제한다
+    #    """
+    #    self.ocx.dynamicCall("CommTerminate()")
 
     def GetRepeatCnt(self, trcode, rqname): #checked
         """
