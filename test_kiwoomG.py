@@ -143,7 +143,7 @@ df = kiwoom.block_request("opt10014",
 ## 계좌
 account = kiwoom.GetLoginInfo("ACCNO")[0]
 ## 시장가 매수
-kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESH21", 1, "0", "", "1", "")
+kiwoom.SendOrder("시장가매수", "0101", account, 2, "ESM21", 1, "0", "", "1", "")
 ## 시장가매도
 kiwoom.SendOrder("시장가매도", "0101", account, 1, "ESH21", 1, "0", "", "1", "")
 ## 지정가매수 
@@ -152,7 +152,7 @@ kiwoom.SendOrder("지정가매수", "0101", account, 2, "ESH21", 1, "3900.00", "
 df = kiwoom.block_request("opw30002",
                           계좌번호="%s"%account,
                           비밀번호="0000",
-                          종목코드="ESH21",
+                          종목코드="MESM21",
                           통화코드="USD",
                           매도수구분="2", #매도-1, 매수-2
                           output="multi",
