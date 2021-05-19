@@ -386,9 +386,14 @@ class Hana:
         """
         return self.ocx.dynamicCall("SetTranInputArrayData(int, QString, QString, QString, QString, int)",  nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex)
 
+    ## FID 조회관련
 
 
 
+
+
+
+    
 
     def CommConnect(self, block=True, login_type=0): # checked
         """
