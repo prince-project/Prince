@@ -1,11 +1,12 @@
 import yfinance as yf
+import pandas as pd
 
 #msft = yf.Ticker("MSFT")
 #hist = msft.history(period="max")
 #data = yf.download("SPY AAPL", start="2017-01-01", end="2017-04-30")
 
-spx = yf.download("^GSPC", start="2020-01-01", end="2021-03-20")
-vix = yf.download("^VIX", start="2020-01-01", end="2021-03-20")
+spx = yf.download("^GSPC", start="2020-01-01", end="2021-04-09")
+vix = yf.download("^VIX", start="2020-01-01", end="2021-04-09")
 
 spx['intra_vol'] = (spx.High - spx.Low) / spx.Close
 spx['intra_bar'] = spx.intra_vol.rolling(3).mean() * 0.5
@@ -28,6 +29,7 @@ dt = pd.read_pickle('%s/%s_%s.pickle' % (loc, ticker, today.date()))
 close_val = abs(float(dt[dt['체결시간n'] == close_hour]['현재가n'].values[0]))
 
 #close_price = 3846.25# put in 16:00 C.T. price of S&P500 futures on the previous day
+close_val = 4098.00
 intra_level = close_val - close_val * spx['intra_bar'][-1]
 
 print(pd.DataFrame([intra_level, vol_scale[-1]], index=['Level', 'Exposure']))
