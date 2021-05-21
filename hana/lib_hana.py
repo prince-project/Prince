@@ -387,13 +387,80 @@ class Hana:
         return self.ocx.dynamicCall("SetTranInputArrayData(int, QString, QString, QString, QString, int)",  nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex)
 
     ## FID 조회관련
+    def SetFidInputData(self, nRqId, strFID, strValue):
+        """
+        30
+        원형: LONG SetFidInputData(LONG nRqId, BSTR strFID, BSTR strValue)
+        기능: FID 조회 시, 항목별 입력값 입력
+        호출: RequestFid 또는 RequestFidArray 호출 전에 조회 Input 데이터 입력 목적으로 호출한다.
+        인자: LONG nRqId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR strFID - FID번호(ex-> "9002")
+              BSTR strValue - FID번호에 대응하는 입력값 (ex-> "000660")
+        반환: LONG 0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("SetFidInputData(int, QString, QString)",  nRqId, strFID, strValue)
+
+    def RequestFid(self, nRqId, strOutputFidList, strScreenNo):
+        """
+        31
+        원형: LONG RequestFid(LONG nRqId, BSTR strOutputFidList, BSTR strScreenNo)
+        기능: FID조회요청 - 응답데이터가 단건(single)
+        호출: 서버에 FID조회 요청 시 호출(응답으로 받을 데이터 단건일 경우에 사용)
+        인자: LONGnRqId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR strOutputFidList - 응답으로 받을 FID번호들(ex-> "4,6,5,7,11,28,13,14,15")
+              BSTR strScreenNo - 화면번호 (ex-> "9999")
+        반환: LONG	음수: 실패, 1: 성공 : 2보다 큰 정수
+        """
+        return self.ocx.dynamicCall("RequestFid(int, QString, QString)",  nRqId, strOutputFidList, strScreenNo)
+
+    def RequestFidArray(self, nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount):
+        """
+        32
+        원형: LONG RequestFidArray(LONG nRqId, BSTR strOutputFidList, BSTR strPreNext, BSTR strPreNextContext, BSTR strScreenNo, LONG nRequestCount)
+        기능: FID조회 요청 - 응답 데이터가 복수건(array)
+        호출: 서버에 FID조회 요청 시 호출(응답받을 데이터가 복수건인 경우에 사용)
+        인자: LONG nRqId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+        BSTR strOutputFidList - 응답으로 받을 FID번호들(ex-> "4,6,5,7,11,28,13,14,15")
+        BSTR strPreNext - 연속조회 구분 ("0" :일반, "1" : 연속 첫 조회, "2" : 이전조회, "3" : 다음조회)
+        BSTR strPreNextContext - 조회 응답으로 받은연속거래키
+        BSTR strScreenNo - 화면변호(ex-> "9999")
+        LONG nRequestCount - 조회 응답으로 받을 최대 데이터 건수(Maxium : 9999)
+        반환: LONG 음수: 실패, 1 : 성공 : 2보다 큰 정수
+        """
+        return self.ocx.dynamicCall("RequestFidArray(int, QString, QString, QString, QString, int)",  nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount)
+
+    def GetFidOutputRowCnt(self, nRequestId):
+        """
+        33
+        원형: LONG GetFidOutputRowCnt(LONG nRequestId)
+        기능: FID조회 응답데이터 건수
+        호출: FID조회응답 이벤트(OnGetFidData) 안에서만 호출한다.
+        인자: LONG nRequestId	조회고유ID(Request ID)- CreateRequestID메소드로 생성
+        반환: LONG 0: 데이터 없음, 0보다 큰 정수 : 데이터 건수
+        """
+        return self.ocx.dynamicCall("GetFidOutputRowCnt(int)",  nRequestId)
+
+    def GetFidOutputData(self, nRequestId, strFid, nRow):
+        """
+        34
+        원형: BSTR GetFidOutputData(LONG nRequestId, BSTR strFid, LONG nRow)
+        기능: FID조회 항목별 응답 데이터 반환
+        호출: FID조회응답 이벤트(OnGetFidData) 안에서만 호출한다.
+        인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR strFid - 응답 받은 FID번호(ex-> "4")
+              LONG nRow - 항목값이 위치한 행 인덱스 (단건(single): 0; 복수건(array) : 해당 행의 인덱스 번호)
+        반환: BSTR FID에 대응한 응답 데이터
+        """
+        return self.ocx.dynamicCall("GetFidOutputData(int, QString, int)",  nRequestId, strFid, nRow)
 
 
 
 
 
 
-    
+
+
+
 
     def CommConnect(self, block=True, login_type=0): # checked
         """
