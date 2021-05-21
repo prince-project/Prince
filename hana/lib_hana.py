@@ -104,6 +104,71 @@ class Hana:
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
     #-------------------------------------------------------------------------------------------------------------------
+    # 이벤트 상세
+    #-------------------------------------------------------------------------------------------------------------------
+    def _set_signals_slots(self):
+        self.ocx.OnGetTranData.connect(self._get_tran_data)
+        self.ocx.OnGetFidData.connect(self._get_fid_data)
+        self.ocx.OnGetRealData.connect(self._get_real_data)
+        self.ocx.OnAgentEventHandler.connect(self._agent_event_handler)
+        
+
+    def _get_tran_data(self, nRequestId, pBlock, nBlockLength):
+        """
+        01
+        원형: void OnGetTranData(LONG nRequestId, BSTR pBlock, long nBlockLength)
+        설명: Tran조회응답 이벤트
+        호출: API 에이전트 컨트롤 CallBack
+        인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR pBlock - 응답 데이터 블록
+              long nBlockLength - 응답 데이터 블록 크기
+        반환: 없음
+        """
+        logging.info(f"OnGetTranData {nRequestId} {pBlock} {nBlockLength}")
+
+    def _get_fid_data(self, nRequestId, pBlock, nBlockLength):
+        """
+        02
+        원형: void OnGetFidData(LONG nRequestId, BSTR pBlock, long nBlockLength)
+        설명: FID조회응답 이벤트
+        호출: API 에이전트 컨트롤 CallBack
+        인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR pBlock - 응답 데이터 블록
+              long nBlockLength - 응답 데이터 블록 크기
+        반환: 없음	
+        """
+        logging.info(f"OnGetFidData {nRequestId} {pBlock} {nBlockLength}")
+
+    def _get_fid_data(self, strRealName, strRealKey, pBlock, nBlockLength):
+        """
+        03
+        원형: void OnGetRealData(BSTR strRealName, BSTR strRealKey, LPCTSTR pBlock, long nBlockLength)
+        설명: 실시간데이터 수신 이벤트
+        호출: API 에이전트 컨트롤 CallBack
+        인자: BSTR strRealName - 실시간 수신 데이터 실시간코드명 - 실시간 리소스파일(*.res)파일의 'REAL_NAME=' 항목(ex-> "S00")
+        BSTR strRealKey - 실시간 수신 실시간등록키(ex-> "000660" : SK하이닉스 종목코드)
+              LPCTSTR pBlock - 수신 데이터 블록
+              long nBlockLength - 수신 데이터 블록 크기
+        반 환	없음	
+        """
+        logging.info(f"OnGetRealData {strRealName} {strRealKey} {pBlock} {nBlockLength}")
+
+    def _agent_event_handler(self, nEventType, nParam, strParam):
+        """
+        04
+        원형: void OnAgentEventHandler(long nEventType, long nParam, LPCTSTR strParam)
+        설명: 통신 접속 해제 등 이벤트
+        호출: API 에이전트 컨트롤 CallBack
+        인자: long nEventType - 통신 이벤트: 100 이상, 공지 이벤트 : 150 이상
+              long nParam - 옵션값
+              LPCTSTR strParam - 옵션값	
+        반환: 없음	
+        기타: StockSiseDlg.cpp, FFutOptOrdDlg.cpp 예제 참고
+        """
+        logging.info(f"OnAgentEventHandler {nEventType} {nParam} {strParam}")
+
+
+    #-------------------------------------------------------------------------------------------------------------------
     # API 메소드 상세
     #-------------------------------------------------------------------------------------------------------------------
 
@@ -306,7 +371,7 @@ class Hana:
         반환: LONG
             0: 실패, 1: 성공
         """
-        return self.ocx.dynamicCall("SetTranInputData(int, QString, QString, QString, QString)",  nRqId, strTrCode, strRecName, strItem, strValue)
+        return self.ocx.dynamicCall("SetTranInputData(int, QString, QString, QString, QString)", nRqId, strTrCode, strRecName, strItem, strValue)
 
     def RequestTran(self, nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount):
         """
@@ -325,7 +390,7 @@ class Hana:
         반환: LONG
             음수: 실패, 0보다 큰 정수: 성공
         """
-        return self.ocx.dynamicCall("RequestTran(int, QString, QString, QString, QString, QString, QString, int)",  nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount)
+        return self.ocx.dynamicCall("RequestTran(int, QString, QString, QString, QString, QString, QString, int)", nRqId, sTrCode, sIsBenefit, sPrevOrNext, sPrevNextKey, sScreenNo, sTranType, nRequestCount)
 
     def GetTranOutputRowCnt(self, strTrCode, strRecName):
         """
@@ -338,7 +403,7 @@ class Hana:
         반환: LONG
             0: 데이터 없음, 0보다 큰 정수: 데이터 건수
         """
-        return self.ocx.dynamicCall("GetTranOutputRowCnt(QString, QString)",  strTrCode, strRecName)
+        return self.ocx.dynamicCall("GetTranOutputRowCnt(QString, QString)", strTrCode, strRecName)
 
     def GetTranOutputData(self, strTrCode, strRecName, strItemName, nRow):
         """
@@ -352,7 +417,7 @@ class Hana:
               LONG nRow
         반환: BSTR
         """
-        return self.ocx.dynamicCall("GetTranOutputData(QString, QString, QString, int)",  strTrCode, strRecName, strItemName, nRow)
+        return self.ocx.dynamicCall("GetTranOutputData(QString, QString, QString, int)", strTrCode, strRecName, strItemName, nRow)
 
     def SetTranInputArrayCnt(self, nRqId, strTrCode, strRecName, nRecCnt):
         """
@@ -367,7 +432,7 @@ class Hana:
         반환: LONG
               0: 실패, 1: 성공
         """
-        return self.ocx.dynamicCall("SetTranInputArrayCnt(int, QString, QString, int)",  nRqId, strTrCode, strRecName, nRecCnt)
+        return self.ocx.dynamicCall("SetTranInputArrayCnt(int, QString, QString, int)", nRqId, strTrCode, strRecName, nRecCnt)
 
     def SetTranInputArrayData(self, nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex):
         """
@@ -384,7 +449,7 @@ class Hana:
         반환: LONG
               0 : 실패, 1 : 성공
         """
-        return self.ocx.dynamicCall("SetTranInputArrayData(int, QString, QString, QString, QString, int)",  nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex)
+        return self.ocx.dynamicCall("SetTranInputArrayData(int, QString, QString, QString, QString, int)", nRqId, strTrCode, strRecName, strItem, strValue, nArrayIndex)
 
     ## FID 조회관련
     def SetFidInputData(self, nRqId, strFID, strValue):
@@ -398,7 +463,7 @@ class Hana:
               BSTR strValue - FID번호에 대응하는 입력값 (ex-> "000660")
         반환: LONG 0: 실패, 1: 성공
         """
-        return self.ocx.dynamicCall("SetFidInputData(int, QString, QString)",  nRqId, strFID, strValue)
+        return self.ocx.dynamicCall("SetFidInputData(int, QString, QString)", nRqId, strFID, strValue)
 
     def RequestFid(self, nRqId, strOutputFidList, strScreenNo):
         """
@@ -411,7 +476,7 @@ class Hana:
               BSTR strScreenNo - 화면번호 (ex-> "9999")
         반환: LONG	음수: 실패, 1: 성공 : 2보다 큰 정수
         """
-        return self.ocx.dynamicCall("RequestFid(int, QString, QString)",  nRqId, strOutputFidList, strScreenNo)
+        return self.ocx.dynamicCall("RequestFid(int, QString, QString)", nRqId, strOutputFidList, strScreenNo)
 
     def RequestFidArray(self, nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount):
         """
@@ -427,7 +492,7 @@ class Hana:
         LONG nRequestCount - 조회 응답으로 받을 최대 데이터 건수(Maxium : 9999)
         반환: LONG 음수: 실패, 1 : 성공 : 2보다 큰 정수
         """
-        return self.ocx.dynamicCall("RequestFidArray(int, QString, QString, QString, QString, int)",  nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount)
+        return self.ocx.dynamicCall("RequestFidArray(int, QString, QString, QString, QString, int)", nRqId, strOutputFidList, strPreNext, strPreNextContext, strScreenNo, nRequestCount)
 
     def GetFidOutputRowCnt(self, nRequestId):
         """
@@ -438,7 +503,7 @@ class Hana:
         인자: LONG nRequestId	조회고유ID(Request ID)- CreateRequestID메소드로 생성
         반환: LONG 0: 데이터 없음, 0보다 큰 정수 : 데이터 건수
         """
-        return self.ocx.dynamicCall("GetFidOutputRowCnt(int)",  nRequestId)
+        return self.ocx.dynamicCall("GetFidOutputRowCnt(int)", nRequestId)
 
     def GetFidOutputData(self, nRequestId, strFid, nRow):
         """
@@ -451,305 +516,160 @@ class Hana:
               LONG nRow - 항목값이 위치한 행 인덱스 (단건(single): 0; 복수건(array) : 해당 행의 인덱스 번호)
         반환: BSTR FID에 대응한 응답 데이터
         """
-        return self.ocx.dynamicCall("GetFidOutputData(int, QString, int)",  nRequestId, strFid, nRow)
+        return self.ocx.dynamicCall("GetFidOutputData(int, QString, int)", nRequestId, strFid, nRow)
 
+    def SetPortfolioFidInputData(self, nRqId, strSymbolCode, strSymbolMarket):
+        """
+        36
+        원형: LONG SetPortfolioFidInputData(LONG nRqId, BSTR strSymbolCode, BSTR strSymbolMarket)
+        기능: 관심종목형(Portfolio) FID조회 시, 항목별 입력값 입력
+        호출: RequestFid 또는 RequestFidArray 호출 전에 조회 Input데이터 입력 목적으로 호출한다.
+        인자: LONG nRqId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
+              BSTR strSymbolCode - 종목코드
+              BSTR strSymbolMarket - 종목 시장코드
+        반환: LONG 0: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("SetPortfolioFidInputData(int, QString, QString)", nRqId, strSymbolCode, strSymbolMarket)
 
+    ## 실시간관련
+    def RegisterReal(self, strRealName, strRealKey):
+        """
+        40
+        원형: LONG RegisterReal(BSTR strRealName, BSTR strRealKey)
+        기능: 실시간 등록한다.
+        호출: 로그인 처리가 완료된 이후 또는 Tran/FID조회응답 이벤트 안에서 호출한다.
+        인자: BSTR strRealName - 실시간 등록할 실시간코드명 - 실시간 리소스파일(*.res)파일의 'REAL_NAME=' 항목(ex-> "S00")
+              BSTR strRealKey - 실시간 수신 시데이터 구분키가 될 값(ex-> "000660" : SK하이닉스 종목코드)
+        반환: LONG 음수: 실패, 0: 성공
+        """
+        return self.ocx.dynamicCall("RegisterReal(QString, QString)", strRealName, strRealKey)
 
+    def UnRegisterReal(self, strRealName, strRealKey):
+        """
+        41
+        원형: LONG UnRegisterReal(BSTR strRealName, BSTR strRealKey)
+        기능: 실시간등록 해제한다.
+        호출: RegisterReal 함수 호출 이후에 호출한다.
+        인자: BSTR strRealName - 실시간등록 해제할 실시간코드명 - 실시간 리소스파일(*.res)파일의 'REAL_NAME=' 항목(ex-> "S00")
+              BSTR strRealKey - 실시간등록 해제할 실시간등록키(ex-> "000660" : SK하이닉스 종목코드)
+        반환: LONG 음수: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("UnRegisterReal(QString, QString)", strRealName, strRealKey)
 
+    def AllUnRegisterReal(self):
+        """
+        42
+        원형: LONG AllUnRegisterReal(void)
+        기능: 모든 실시간등록 해제한다.
+        호출: RegisterReal 함수 호출 이후에 호출한다.
+        인자: 없음	
+        반환: LONG 음수: 실패, 1: 성공
+        """
+        return self.ocx.dynamicCall("AllUnRegisterReal()")
 
+    def GetRealOutputData(self, strRealName, strItemName):
+        """
+        43
+        원형: BSTR GetRealOutputData(BSTR strRealName, BSTR strItemName)
+        기능: 항목별 실시간 수신 데이터를 반환한다.
+        호출: 실시간데이터 수신 이벤트(OnGetRealData) 안에서만 호출한다.
+        인자: BSTR strRealName - 실시간 수신 데이터 실시간코드명 - 실시간 리소스파일(*.res)파일의 'REAL_NAME=' 항목(ex-> "S00")
+              BSTR strItemName - 실시간 리소스파일(*.res)파일의 'ITEM=' 항목(ex-> "SHRN_ISCD")
+        반환: BSTR 해당 strItemName에 대응하는 데이터값 반환
+        """
+        return self.ocx.dynamicCall("GetRealOutputData(QString, QString)", strRealName, strItemName)
 
+    ## 부가적인메소드
+    def GetLastErrMsg(self):
+        """
+        50
+        원형: BSTR GetLastErrMsg(void)
+        기능: 에러 메시지 확인
+        호출: API메소드에서 에러가 발생했을 경우, 에러메시지 확인하기 위해 호출한다.
+        인자: 없음	
+        반환: BSTR 마지막으로 호출된 API메소드에서 에러가 발생했을 경우 에러메시지 반환
+        """
+        return self.ocx.dynamicCall("GetLastErrMsg()")
 
+    def GetApiAgentModulePath(self):
+        """
+        51
+        원형: BSTR GetApiAgentModulePath(void)
+        기능: OpenAPI 에이전트 모듈 파일경로 반환
+        호출: 에이전트 오브젝트 생성 이후에 호출
+        인자: 없음	
+        반환: BSTR OpenAPI 에이전트 모듈 파일경로 반환
+        """
+        return self.ocx.dynamicCall("GetApiAgentModulePath()")
 
+    def GetEncrpyt(self, strPlainText):
+        """
+        52
+        원형: BSTR GetEncrpyt (BSTR strPlainText)
+        기능: 평문을 암호화한다(계좌비밀번호 암호화 등에 사용된다.)
+        호출:	
+        인자: BSTR 평문
+        반환: BSTR 암호문
+        """
+        return self.ocx.dynamicCall("GetEncrpyt(QString)", strPlainText)
 
+    def SetOffAgentMessageBox(self, nOption):
+        """
+        53
+        원형: void SetOffAgentMessageBox (LONG nOption)
+        기능: 에이전트에 띄우는 메시박스를 막는다.
+        호출: CommInit 함수 호출전 SetOffAgentMessageBox함수를 호출해야된다.
+        인자: LONG 0: 에이전트 메시지박스 실행, 1: 에이전트 메시지박스 실행 안 함
+        반 환	없음	
+        """
+        self.ocx.dynamicCall("SetOffAgentMessageBox(int)", nOption)
 
-    def CommConnect(self, block=True, login_type=0): # checked
+    def SetOptionalFunction(self, nOption, nValue1, nValue2, strValue1, strValue2):
         """
-        로그인 윈도우를 실행합니다.
-        :param block: True: 로그인완료까지 블록킹 됨, False: 블록킹 하지 않음
-        : 0 - 버전 수동처리, 1 - 버전 자동처리
-        :return: None
+        54
+        원형: BSTR SetOptionalFunction(LONG nOption, LONG nValue1, LONG nValue2, BSTR strValue1, BSTR strValue2)
+        기능: 부가적인 옵션 처리(옵션 세부 설정은 신규 추가 시 가이드 문서에 포함 재배포)
+        호출:	
+        인자: 없음	
+        반환: BSTR 옵션 처리 결과 문자열
         """
-        self.ocx.dynamicCall("CommConnect(%s)"%login_type)
-        if block:
-            while not self.connected:
-                pythoncom.PumpWaitingMessages()
+        return self.ocx.dynamicCall("SetOptionalFunction(int, int, int, QString, QString)", nOption, nValue1, nValue2, strValue1, strValue2)
 
-    def CommRqData(self, rqname, trcode, next, screen): # checked
+    ## 계좌관련메소드
+    def GetAccInfo(self, nOption, szAccNo):
         """
-        TR을 서버로 송신합니다.
-        :param rqname: 사용자가 임의로 지정할 수 있는 요청 이름
-        :param trcode: 요청하는 TR의 코드
-        :param next: 0: 처음 조회, 2: 연속 조회
-        :param screen: 화면번호 ('0000' 또는 '0' 제외한 숫자값으로 200개로 한정된 값
-        :return: None
+        60
+        원형: BSTR GetAccInfo(LONG nOption, BSTR szAccNo)
+        기능: 계좌 정보
+        호출	
+        인자: LONG nOption - 0 : 계좌대체번호, 1 : 계좌상품번호, 198 : 대리인 등록여부("Y" : 주문대리 계좌)
+              BSTR szAccNo - 계좌번호
+        반환: BSTR 옵션에 해당하는 값
         """
-        #print("***** CommRqData *****")
-        #print(rqname)
-        #print(trcode)
-        self.ocx.dynamicCall("CommRqData(QString, QString, QString, QString)", rqname, trcode, next, screen)
+        return self.ocx.dynamicCall("GetAccInfo(int, QString)", nOption, szAccNo)
 
-    def SetInputValue(self, id, value): #checked
+    def GetUserAccCnt(self):
         """
-        TR 입력값을 설정하는 메서드
-        :param id: TR INPUT의 아이템명
-        :param value: 입력 값
-        :return: None
+        61
+        원형: LONG GetUserAccCnt()
+        기능: 보유계좌 수
+        호출	
+        인자: 없음	
+        반환: LONG 보유계좌 수
         """
-        self.ocx.dynamicCall("SetInputValue(QString, QString)", id, value)
+        return self.ocx.dynamicCall("GetUserAccCnt()")
 
-    def GetCommData(self, trcode, rqname, index, item): #checked
+    def GetUserAccNo(self, nIndex):
         """
-        수신 데이터를 가져가는 메서드
-        :param trcode: TR 코드
-        :param rqname: 요청 이름
-        :param index: 멀티데이터의 경우 row index
-        :param item: 얻어오려는 항목 이름
-        :return: 수신 데이터
-        :ex) 현재가출력 - GetCommData("OPT00001", "해외선물기본정보", 0, "현재가")
+        62
+        원형: BSTR GetUserAccNo(LONG nIndex)
+        기능: 보유계좌 반환
+        호출	
+        인자: LONG nIndex - 보유계좌 인덱스
+        반환: BSTR 계좌번호반환(종합계좌번호(8) + 계좌상품번호(3))
         """
-        data = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", trcode, rqname, index, item)
-        return data.strip()
+        return self.ocx.dynamicCall("GetUserAccNo(int)", nIndex)
 
-    #def CommTerminate(self): #checked
-    #    """
-    #    OpenAPI의 서버 접속을 해제한다
-    #    """
-    #    self.ocx.dynamicCall("CommTerminate()")
-
-    def GetRepeatCnt(self, trcode, rqname): #checked
-        """
-        레코드 반복횟수를 반환
-        멀티데이터의 행(row)의 개수를 얻는 메서드
-        :param trcode: TR코드
-        :param rqname: 사용자가 설정한 요청이름
-        :return: 멀티데이터의 행의 개수
-        :        레코드의 반복횟수
-        :ex) GetRepeatCnt("OPT00001", "해외선물체결데이타")
-        """
-        count = self.ocx.dynamicCall("GetRepeatCnt(QString, QString)", trcode, rqname)
-        return count
-
-    def DisconnectRealData(self, screen): #checked
-        """
-        화면번호에 대한 리얼 데이터 요청을 해제하는 메서드
-        :param screen: 화면번호
-        :return: None
-        """
-        self.ocx.dynamicCall("DisconnectRealData(QString)", screen)
-
-    def GetCommRealData(self, code, fid): #checked
-        """
-        실시간 데이터를 반환
-        ex) GetCommRealData("해외선물시세", 10)
-        """
-        data = self.ocx.dynamicCall("GetCommRealData(QString, int)", code, fid)
-        return data
-
-    def GetChejanData(self, fid): #checked
-        """
-        체결잔고 데이터 반환
-        ex) GetChejanData(910) //체결가격
-        """
-        data = self.ocx.dynamicCall("GetChejanData(int)", fid)
-        return data
-
-    def SendOrder(self, rqname, screen, accno, order_type, code, quantity, price, stop, hoga, order_no): #checked
-        """
-        주문을 서버로 전송하는 메서드
-        시장가 주문시 주문단가는 0으로 입력해야 함 (가격을 입력하지 않음을 의미)
-        :param rqname: 사용자가 임의로 지정할 수 있는 요청 이름
-        :param screen: 화면번호[4] (1~9999 :숫자값으로만 가능)
-        :param accno: 계좌번호[10]
-        :param order_type: 주문유형 (1:신규매도, 2:신규매수, 3:매도취소, 4:매수취소, 5:매도정정, 6:매수정정)
-        :param code: 종목코드
-        :param quantity: 주문수량
-        :param price: 주문단가
-        :param stop: Stop단가
-        :param hoga: 거래구분 (1:시장가, 2:지정가, 3:STOP, 4:STOP LIMIT)
-        :param order_no: 원주문번호
-        :return:
-        ex)
-        지정가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0.7900”, “2”, “”);
-        시장가 매수 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 2, “6AH16”, 10, “0”, “1”, “”);
-        매수 정정 - openApi.SendOrder(“RQ_1”,“0101”, “5015123410”, 6, “6AH16”, 10, “0.7800”, “0”, “200060”);
-        매수 취소 - openApi.SendOrder(“RQ_1”, “0101”, “5015123410”, 4, “6AH16”, 10, “0”, “0”, “200061”);
-        """
-        ret = self.ocx.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, QString, QString, QString, QString)",
-                                   [rqname, screen, accno, order_type, code, quantity, price, stop, hoga, order_no])
-        return ret
-
-
-    def GetLoginInfo(self, tag): #checked
-        """
-        로그인한 사용자 정보를 반환하는 메서드
-        :param tag: ("ACCOUNT_CNT, "ACCNO", "USER_ID", "USER_NAME", "KEY_BSECGB", "FIREW_SECGB")
-        :return: tag에 대한 데이터 값
-        """
-        data = self.ocx.dynamicCall("GetLoginInfo(QString)", tag)
-
-        if tag == "ACCNO":
-            return data.split(';')[:-1]
-        else:
-            return data
-    
-    def GetGlobalFutureItemlist(self): #checked
-        """
-        해외선물 상품리스트를 반환
-        """
-        data = self.ocx.dynamicCall("GetGlobalFutureItemlist()")
-        return data
-    
-    def GetGlobalOptionItemlist(self): #checked
-        """
-        해외옵션 상품리스트를 반환
-        """
-        data = self.ocx.dynamicCall("GetGlobalFutureItemlist()")
-        return data
-    
-    def GetGlobalFutureCodelist(self, item): #checked
-        """
-        해외상품별 해외선물 종목코드리스트를 반환
-        :param item: 해외상품
-        :return:
-        """
-        data = self.ocx.dynamicCall("GetGlobalFutureCodelist(QString)", item)
-        return data
-
-    def GetGlobalOptionCodelist(self, item): #checked
-        """
-        해외상품별 해외옵션 종목코드리스트를 반환
-        :param item: 해외상품
-        :return:
-        """
-        data = self.ocx.dynamicCall("GetGlobalFutureCodelist(QString)", item)
-        return data
-
-    def GetConnectState(self): #checked
-        """
-        현재접속 상태를 반환하는 메서드
-        :return: 0:미연결, 1: 연결완료
-        """
-        ret = self.ocx.dynamicCall("GetConnectState()")
-        return ret
-
-    def GetAPIModulePath(self): #checked
-        """
-        OpenAPI 모듈의 경로를 반환하는 메서드
-        :return: 모듈의 경로
-        """
-        ret = self.ocx.dynamicCall("GetAPIModulePath()")
-        return ret
-
-    def GetCommonFunc(self, func_name, param): #checked
-        """
-        공통함수로 추후 추가함수가 필요시 사용할 함수
-        :param func_name: 함수명
-        :param param: 인자값
-        :return: 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetCommonFunc(QString, QString)", [func_name, param])
-        return ret
-
-    def GetConvertPrice(self, code, price, ntype): # checked
-        """
-        가격 진법에 따라 변환된 가격을 반환
-        :param code: 종목코드
-        :param price: 가격
-        :param ntype: 타입(0 : 진법->10진수, 1 : 10진수->진법)
-        :return: 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetConvertPrice(QString, QString, int)", [code, price, ntype])
-        return ret 
-
-    def GetGlobalFutOpCodeInfoByType(self, gubun, stype): #checked
-        """
-        해외선물옵션종목코드정보를 타입별로 반환
-        :param gubun: 0(해외선물), 1(해외옵션)
-        :param stype: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
-        :return: 종목코드정보리스트들을 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByType(int, QString)", [gubun, stype])
-        return ret 
-
-    def GetGlobalFutOpCodeInfoByCode(self, scode): #checked
-        """
-        해외선물옵션종목코드정보를 종목코드별로 반환
-        :param scode: 해외선물옵션 종목코드
-        :return: 종목코드정보리스트들을 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalFutOpCodeInfoByCode(QString)", scode)
-        return ret 
-
-    def GetGlobalFutureItemlistByType(self, stype): #checked
-        """
-        해외선물상품리스트를 타입별로 반환
-        :param stype: IDX(지수), CUR(통화), INT(금리), MLT(금속), ENG(에너지), CMD(농산물)
-        :return: 상품리스트를 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalFutureItemlistByType(QString)", stype)
-        return ret 
-
-    def GetGlobalFutureCodeByItemMonth(self, sitem, smonth): #checked
-        """
-        해외선물종목코드를 상품/월물별로 반환
-        :param sitem: 상품코드(6A, ES..)
-        :param smonth: “201606”
-        :return: 종목코드를 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalFutureCodeByItemMonth(QString, QString)", [sitem, smonth])
-        return ret 
-
-    def GetGlobalOptionCodeByMonth(self, sitem, cp_gubun, act_price, smonth): #checked
-        """
-        해외옵션종목코드를 상품/콜풋/행사가/월물별로 반환
-        :param sitem: 상품코드(6A, ES..)
-        :param cp_gubun: C(콜)/P(풋)
-        :param act_price: 0.760
-        :param smonth: “201606”
-        :return: 종목코드를 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalOptionCodeByMonth(QString, QString, QString, QString)", [sitem, cp_gubun, act_price, smonth])
-        return ret 
-
-    def GetGlobalOptionMonthByItem(self, sitem): #checked
-        """
-        해외옵션월물리스트를 상품별로 반환
-        :param sitem: 상품코드(6A, ES..)
-        :return: 월물리스트를 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalOptionMonthByItem(QString)", sitem)
-        return ret 
-
-    def GetGlobalOptionActPriceByItem(self, sitem): #checked
-        """
-        해외옵션행사가리스트를 상품별로 반환
-        :param sitem: 상품코드(6A, ES..)
-        :return: 행사가리스트를 문자값으로 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalOptionActPriceByItem(QString)", sitem)
-        return ret 
-
-    def GetGlobalFutureItemTypelist(self): #checked
-        """
-        해외선물상품타입리스트를 반환
-        :return: 상품타입리스트를 문자값으로 반환; e.g) IDX;CUR;INT;MLT;ENG;CMD; 반환
-        """
-        ret = self.ocx.dynamicCall("GetGlobalFutureItemTypelist()")
-        return ret
-
-    def GetCommFullData(self, tr_code, record_name, gubun): #checked
-        """
-        수신된 전체데이터를 반환
-        :param tr_code: Tran 코드
-        :param record_name: 레코드명
-        :param gubun: 0 : 전체(싱글+멀티), 1 : 싱글데이타, 2 : 멀티데이타
-        :return: 수신 전체데이터를 문자값으로 반환
-        :비고
-            WKOAStudio의 TR목록탭에서 필드 사이즈 참조.(필드명 옆 가로안의 값들)
-            모든 시세/원장 조회에 사용 가능하며, 특히 차트데이타 같은 대용량 데이터를 한번에 받아서 처리가능
-        """
-        ret = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", [tr_code, record_name, gubun])
-        return ret 
 
     def block_request(self, *args, **kwargs):
         trcode = args[0].lower()
