@@ -139,7 +139,7 @@ class Hana:
         """
         logging.info(f"OnGetFidData {nRequestId} {pBlock} {nBlockLength}")
 
-    def _get_fid_data(self, strRealName, strRealKey, pBlock, nBlockLength):
+    def _get_real_data(self, strRealName, strRealKey, pBlock, nBlockLength):
         """
         03
         원형: void OnGetRealData(BSTR strRealName, BSTR strRealKey, LPCTSTR pBlock, long nBlockLength)
@@ -708,6 +708,69 @@ class Hana:
 
         return self.tr_data
 
+    def _execute_login(self, login_mode, pid, pwd, cert_pwd):
+
+        #**********************************************************
+        # 접속서버를 설정한다.(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
+        #**********************************************************       
+        self.SetLoginMode(0, login_mode)
+
+        #**********************************************************
+        # API에이전트에서 강제로 메시지 박스 실행하는 것을 막는다.
+        #**********************************************************
+        self.SetOffAgentMessageBox(1)
+
+        #**********************************************************
+        # 이미 로그인한 상태인지 확인한다.
+        #**********************************************************
+        login_state = self.GetLoginState()
+        if login_state == 1:
+            return print('******* Already logged-in *******')
+
+        #**********************************************************
+        # 통신을 연결한다.
+        #**********************************************************
+        comm_init = self.CommInit()
+        if comm_init < 0:
+            return self.GetLastErrMsg()
+
+        #**********************************************************
+        # 통신이 정상적으로 연결되었는지 확인
+        #**********************************************************
+        if self.CommGetConnectState() != 1:
+            return print('******* Connection failed *******')
+
+        #**********************************************************
+        # 로그인 시도
+        #**********************************************************
+        try_login = self.CommLogin(pid, pwd, cert_pwd)
+        if try_login != 1:
+            return self.GetLastErrMsg()
+        else:
+            print('******* login succeeded *******')
+
+        #**********************************************************
+        # 로그인이 완료되면 주문 실시간을 등록한다.
+        # 주문 실시간 통보는 사용자ID가 등록키가 된다.
+        #**********************************************************
+        # 체결 실시간 통보
+        self.RegisterReal("EF1", pid)
+        # 미체결 실시간 통보
+        self.RegisterReal("EF4", pid)
+
+    def _execute_logout(self, pid):
+
+        #**********************************************************
+        # LogOut 처리
+        #**********************************************************        
+        self.CommLogout(pid)
+
+        #**********************************************************
+        # 통신 연결을 종료한다.
+        #**********************************************************
+        self.CommTerminate(1)
+        
+        print('******* Logged-out successfully *******')
 
 
 if not QApplication.instance():
