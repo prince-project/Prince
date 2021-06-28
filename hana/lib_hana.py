@@ -7,18 +7,17 @@ import datetime
 import pandas as pd
 import time
 import logging
-import os
-
-sys.path.append(os.path.abspath('C:\GitHub\hana'))
-#from kiwoomG_parser import *
-#from kiwoomK_parser import *
-
-logging.basicConfig(filename="log.txt", level=logging.ERROR)
 
 
-class Hana:
+class HanaAPI:
     def __init__(self, login=False):
         self.ocx = QAxWidget("HFCOMMAGENT.HFCommAgentCtrl.1")
+        self.tr_code = None
+        self.in_rec_name = None
+        self.item = None
+        self.value = None
+        
+        
         self.connected = False              # for login event
         self.received = False               # for tr event
         self.tr_items = None                # tr input/output items
@@ -31,12 +30,37 @@ class Hana:
         if login:
             self.CommConnect()
 
-    def _handler_login(self, err_code):
-        logging.info(f"hander login {err_code}")
-        if err_code == 0:
-            self.connected = True
+    def _handler_login(self, nEventType, nParam, strParam):
+        #logging.info(f"handler login {err_code}")
+        print(datetime.datetime.now())
+        print(nEventType)
+        print(nParam)
+        print(strParam)
+        #if err_code == 0:
+        #    self.connected = True
 
-    def _handler_tr(self, screen, rqname, trcode, record, next):
+    def _handler_tr(self, nRequestId, pBlock, nBlockLength):
+
+        # 연속조회(0 : 연속조회 미사용,1 : 이전 데이터 있음,2 : 다음 데이터 있음,3 : 이전/다음 데이터 있음)
+        strPreNext = self.GetCommRecvOptionValue(1)
+        #연속조회키
+        strPreNextContext = self.GetCommRecvOptionValue(2)
+        #조회응답 메시지코드
+        strMsgCode = self.GetCommRecvOptionValue(3)
+        #조회응답 메시지
+        strMsg = self.GetCommRecvOptionValue(4)
+        #조회응답 부가메시지코드
+        strSubMsgCode = self.GetCommRecvOptionValue(5)
+        #조회응답 부가메시지
+        strSubMsg = self.GetCommRecvOptionValue(6)
+
+        self.m_nRqID = self.CreateRequestID()
+
+
+
+
+        self.m_nRqID = 0
+
         #print('*********************************************')
         #print(next)
         logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
@@ -99,32 +123,44 @@ class Hana:
 
     def _set_signals_slots(self):
         self.ocx.OnAgentEventHandler.connect(self._handler_login)
-        #self.ocx.OnReceiveTrData.connect(self._handler_tr)
+        self.ocx.OnGetTranData.connect(self._handler_tr)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
     #-------------------------------------------------------------------------------------------------------------------
     # 이벤트 상세
     #-------------------------------------------------------------------------------------------------------------------
-    def _set_signals_slots(self):
-        self.ocx.OnGetTranData.connect(self._get_tran_data)
-        self.ocx.OnGetFidData.connect(self._get_fid_data)
-        self.ocx.OnGetRealData.connect(self._get_real_data)
-        self.ocx.OnAgentEventHandler.connect(self._agent_event_handler)
+    #def _set_signals_slots(self):
+    #    self.ocx.OnGetTranData.connect(self._get_tran_data)
+    #    self.ocx.OnGetFidData.connect(self._get_fid_data)
+    #    self.ocx.OnGetRealData.connect(self._get_real_data)
+    #    self.ocx.OnAgentEventHandler.connect(self._agent_event_handler)
         
 
     def _get_tran_data(self, nRequestId, pBlock, nBlockLength):
         """
         01
         원형: void OnGetTranData(LONG nRequestId, BSTR pBlock, long nBlockLength)
-        설명: Tran조회응답 이벤트
+        설명: Tran조회응답 이벤트 -> 주문체결/잔고 등 조회 결과 데이터를 서버로부터 수신하는 이벤트
         호출: API 에이전트 컨트롤 CallBack
         인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
               BSTR pBlock - 응답 데이터 블록
               long nBlockLength - 응답 데이터 블록 크기
         반환: 없음
+        주의: OnGetTranData 이벤트에서 인자 또는 함수로 얻은 값은 모두 휘발성으로 이벤트 콜백함수 종료 후에는 유효하지 않음.
         """
         logging.info(f"OnGetTranData {nRequestId} {pBlock} {nBlockLength}")
+
+        str_tr_code = self.GetCommRecvOptionValue(0)
+        str_pre_next = self.GetCommRecvOptionValue(1)
+        str_pre_next_context = self.GetCommRecvOptionValue(2)
+        str_msg_code = self.GetCommRecvOptionValue(3)
+        str_msg = self.GetCommRecvOptionValue(4)
+        str_sub_msg_code = self.GetCommRecvOptionValue(5)
+        str_sub_msg = self.GetCommRecvOptionValue(6)
+        str_is_error = self.GetCommRecvOptionValue(7)
+        str_err_msg = self.GetLastErrMsg()
+
 
     def _get_fid_data(self, nRequestId, pBlock, nBlockLength):
         """
@@ -708,69 +744,51 @@ class Hana:
 
         return self.tr_data
 
-    def _execute_login(self, login_mode, pid, pwd, cert_pwd):
+
+    def _request_balance(self, ctno, apno, acc_pwd):
 
         #**********************************************************
-        # 접속서버를 설정한다.(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
-        #**********************************************************       
-        self.SetLoginMode(0, login_mode)
+        # 잔고 조회
+        #**********************************************************
 
-        #**********************************************************
-        # API에이전트에서 강제로 메시지 박스 실행하는 것을 막는다.
-        #**********************************************************
-        self.SetOffAgentMessageBox(1)
+        tr_code = "OTS5919Q41" # Tran코드(리소스파일 참고)
+        in_rec_name1 = "OTS5919Q41_in" # 입력 레코드명(리소스파일 참고)
+        in_rec_name2 = "OTS5919Q41_in_sub01" # 입력 레코드명(리소스파일 참고)
+        odrv_sell_buy_dcd = "0" # 해외파생매도매수구분코드(0:전체, B:매수, S:매도)
 
-        #**********************************************************
-        # 이미 로그인한 상태인지 확인한다.
-        #**********************************************************
-        login_state = self.GetLoginState()
-        if login_state == 1:
-            return print('******* Already logged-in *******')
+        #*-------------------------------*
+        # [1] Request ID생성
+        #*-------------------------------*
+        g_n_rq_id_balance_list = self.CreateRequestID()
+        self.SetTranInputData(g_n_rq_id_balance_list, tr_code, in_rec_name1, "ODRV_SELL_BUY_DCD", odrv_sell_buy_dcd)
 
-        #**********************************************************
-        # 통신을 연결한다.
-        #**********************************************************
-        comm_init = self.CommInit()
-        if comm_init < 0:
-            return self.GetLastErrMsg()
+        #*-------------------------------*
+        # [2] 입력 건수를 입력한다.
+        #*-------------------------------*
+        input_cnt = 1
+        self.SetTranInputArrayCnt(g_n_rq_id_balance_list, tr_code, in_rec_name2, 1)
 
-        #**********************************************************
-        # 통신이 정상적으로 연결되었는지 확인
-        #**********************************************************
-        if self.CommGetConnectState() != 1:
-            return print('******* Connection failed *******')
-
-        #**********************************************************
-        # 로그인 시도
-        #**********************************************************
-        try_login = self.CommLogin(pid, pwd, cert_pwd)
-        if try_login != 1:
-            return self.GetLastErrMsg()
-        else:
-            print('******* login succeeded *******')
-
-        #**********************************************************
-        # 로그인이 완료되면 주문 실시간을 등록한다.
-        # 주문 실시간 통보는 사용자ID가 등록키가 된다.
-        #**********************************************************
-        # 체결 실시간 통보
-        self.RegisterReal("EF1", pid)
-        # 미체결 실시간 통보
-        self.RegisterReal("EF4", pid)
-
-    def _execute_logout(self, pid):
-
-        #**********************************************************
-        # LogOut 처리
-        #**********************************************************        
-        self.CommLogout(pid)
-
-        #**********************************************************
-        # 통신 연결을 종료한다.
-        #**********************************************************
-        self.CommTerminate(1)
+        #*-------------------------------*
+        # [3] Tran조회 입력값을 입력한다.
+        #*-------------------------------*
+        for i in [0, 1, 2]:
+            pwd = self.GetEncrpyt(acc_pwd)
+            self.SetTranInputArrayData(g_n_rq_id_balance_list, tr_code, in_rec_name2, "CTNO", ctno, i)
+            self.SetTranInputArrayData(g_n_rq_id_balance_list, tr_code, in_rec_name2, "APNO", apno, i)
+            self.SetTranInputArrayData(g_n_rq_id_balance_list, tr_code, in_rec_name2, "PWD", pwd, i)
         
-        print('******* Logged-out successfully *******')
+        benefit_acc = "N"
+        pre_next = "1"
+        screen_no = "9999"
+
+        request_data_cnt = 0
+
+        #*-------------------------------*
+        # [4] 서버에 Tran조회 요청한다.
+        #*-------------------------------*
+        request_tran = self.RequestTran(g_n_rq_id_balance_list, tr_code, benefit_acc, pre_next, "", screen_no, "Q", 0)
+        if request_tran < 0:
+            self.GetLastErrMsg()
 
 
 if not QApplication.instance():

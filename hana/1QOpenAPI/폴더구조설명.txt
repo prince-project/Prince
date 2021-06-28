@@ -1,0 +1,37 @@
+[ 1QOpenAPI 패키지 폴더 계층 ]
+
+
+※ APIAgent v0.1 패키지부터 기본설치 폴더명과 구성이 변경되었습니다.
+
+    [기존] C:\1Q HTS OpenAPI ----->>  [현재] C:\1Q OpenAPI
+
+
+
+※ APIAgent v0.1 패키지부터 ApiAgent와 예제 실행파일이 분리되었습니다.
+
+    [1Q OpenAPI]┐ (root 폴더)
+                │
+                ├[1QApiAgent] (API 에이전트 모듈 폴더)
+                │
+                ├[Document]   (API 개발 가이드문서 폴더)
+                │
+                └[Example]┐  (API 예제 프로그램 폴더)
+                           │
+                           ├[C#] ┐
+                           │     │
+                           │     ├[bin] (C# 예제 프로그램 exe파일)
+                           │     │
+                           │     └[src] (C# 예제 프로젝트소스)
+                           │
+                           ├[MFC]┐
+                           │     │
+                           │     ├[bin] (MFC 예제 프로그램 exe파일)
+                           │     │
+                           │     └[src] (MFC 예제 프로젝트소스)
+                           │
+                           └[Excel]┐
+                                    │
+                                    └[src] (Excel 예제 파일)
+
+
+    (예제 프로그램과 예제 프로젝트소스는 MS Visual Studio 2013 에서 개발되었습니다.)

@@ -1,0 +1,14 @@
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\bin\Debug\CSharpOpenAPI.exe.config
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\Interop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\AxInterop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpSiseOpenAPI.csproj.ResolveComReference.cache
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\bin\Debug\CSharpOpenAPI.exe
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\bin\Debug\CSharpOpenAPI.pdb
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\bin\Debug\Interop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\bin\Debug\AxInterop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpSiseOpenAPI.csprojResolveAssemblyReference.cache
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpOpenAPI.IndexFutSiseForm.resources
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpOpenAPI.Properties.Resources.resources
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpSiseOpenAPI.csproj.GenerateResource.Cache
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpOpenAPI.exe
+C:\1Q OpenAPI\Example\C#\src\CSharpOpenAPI\obj\Debug\CSharpOpenAPI.pdb

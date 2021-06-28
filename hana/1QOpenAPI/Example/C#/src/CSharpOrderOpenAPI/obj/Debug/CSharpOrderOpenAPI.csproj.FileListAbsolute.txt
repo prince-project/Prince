@@ -1,0 +1,13 @@
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\bin\Debug\CSharpOrderOpenAPI.exe.config
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\bin\Debug\CSharpOrderOpenAPI.exe
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\bin\Debug\CSharpOrderOpenAPI.pdb
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\bin\Debug\Interop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\bin\Debug\AxInterop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\Interop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\AxInterop.HFCommAgentLib.dll
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.csproj.ResolveComReference.cache
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.OrderForm.resources
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.Properties.Resources.resources
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.csproj.GenerateResource.Cache
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.exe
+C:\1Q OpenAPI\Example\C#\src\CSharpOrderOpenAPI\obj\Debug\CSharpOrderOpenAPI.pdb
