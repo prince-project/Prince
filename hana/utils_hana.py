@@ -6,7 +6,7 @@ from lib_hana import *
 
 def execute_login(HanaAPI, login_mode, pid, pwd, cert_pwd):
 
-    #**********************************************************
+    #**********************s************************************
     # 접속서버를 설정한다.(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
     #**********************************************************       
     HanaAPI.SetLoginMode(0, login_mode)
@@ -28,7 +28,7 @@ def execute_login(HanaAPI, login_mode, pid, pwd, cert_pwd):
     #**********************************************************
     comm_init = HanaAPI.CommInit()
     if comm_init < 0:
-        return HanaAPI.GetLastErrMsg()
+        return print(HanaAPI.GetLastErrMsg())
 
     #**********************************************************
     # 통신이 정상적으로 연결되었는지 확인
@@ -41,9 +41,10 @@ def execute_login(HanaAPI, login_mode, pid, pwd, cert_pwd):
     #**********************************************************
     try_login = HanaAPI.CommLogin(pid, pwd, cert_pwd)
     if try_login != 1:
-        return HanaAPI.GetLastErrMsg()
+        return print(HanaAPI.GetLastErrMsg())
     else:
         print('******* login succeeded *******')
+        HanaAPI.connected = True
 
     #**********************************************************
     # 로그인이 완료되면 주문 실시간을 등록한다.

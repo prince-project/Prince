@@ -19,6 +19,7 @@ class HanaAPI:
         
         
         self.connected = False              # for login event
+
         self.received = False               # for tr event
         self.tr_items = None                # tr input/output items
         self.tr_data = None                 # tr output data
@@ -30,14 +31,9 @@ class HanaAPI:
         if login:
             self.CommConnect()
 
-    def _handler_login(self, nEventType, nParam, strParam):
-        #logging.info(f"handler login {err_code}")
-        print(datetime.datetime.now())
-        print(nEventType)
-        print(nParam)
-        print(strParam)
-        #if err_code == 0:
-        #    self.connected = True
+    def _event_connect(self, nEventType, nParam, strParam):
+        if nEventType >= 150:
+            print(strParam)
 
     def _handler_tr(self, nRequestId, pBlock, nBlockLength):
 
@@ -122,7 +118,7 @@ class HanaAPI:
         logging.info(f"OnReceiveChejanData {gubun} {item_cnt} {fid_list}")
 
     def _set_signals_slots(self):
-        self.ocx.OnAgentEventHandler.connect(self._handler_login)
+        self.ocx.OnAgentEventHandler.connect(self._event_connect)
         self.ocx.OnGetTranData.connect(self._handler_tr)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
