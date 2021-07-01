@@ -1,12 +1,18 @@
-import telepot 
+import telepot
 import pprint
 
-token = "1385119781:AAExma3hOSbMJ4AsMJVEgx5NDGJANZfcN1Y"
-id =  34316367
-token = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
-id = 1524661832
-bot = telepot.Bot(token)
-bot.sendMessage(chat_id=id, text="Prince Project Under Construction")
+token = {}
+id = {}
+token['smlee'] = "1385119781:AAExma3hOSbMJ4AsMJVEgx5NDGJANZfcN1Y"
+token['shlee'] = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
+#token['sknam']
+
+id['smlee'] = 34316367
+id['shlee'] = 1524661832
+#id['sknam']
+
+bot = telepot.Bot(token['smlee'])
+bot.sendMessage(chat_id=id['smlee'], text="test")
 
 info = bot.getMe()
 pprint.pprint(info)
@@ -21,5 +27,3 @@ token = "1698192054:AAHN88q2aPx88pGuMRHcXYBeCdtWL4L9L4E"
 bot = telepot.Bot(token)
 resp = bot.getUpdates()
 pprint.pprint(resp)
-
-
