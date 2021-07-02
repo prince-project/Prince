@@ -35,6 +35,11 @@ class HanaAPI:
         if nEventType >= 150:
             print(strParam)
 
+    def _event_fid(self, nRequestId, pBlock, nBlockLength):
+        logging.info(f"logging - OnGetFidData")
+        print('*** OnGetFidData ***')
+        
+
     def _handler_tr(self, nRequestId, pBlock, nBlockLength):
 
         # 연속조회(0 : 연속조회 미사용,1 : 이전 데이터 있음,2 : 다음 데이터 있음,3 : 이전/다음 데이터 있음)
@@ -119,6 +124,7 @@ class HanaAPI:
 
     def _set_signals_slots(self):
         self.ocx.OnAgentEventHandler.connect(self._event_connect)
+        self.ocx.OnGetFidData.connect(self._event_fid)
         self.ocx.OnGetTranData.connect(self._handler_tr)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
