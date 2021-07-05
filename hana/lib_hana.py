@@ -16,7 +16,7 @@ class HanaAPI:
         self.in_rec_name = None
         self.item = None
         self.value = None
-        self.m_nRqID = 0
+        self.m_nRqId = 0
         
         
         self.connected = False              # for login event
@@ -48,10 +48,10 @@ class HanaAPI:
         print(self.GetCommRecvOptionValue(5))
         print(self.GetCommRecvOptionValue(6))
 
-        print(self.m_nRqID) 
+        print(self.m_nRqId) 
         print(self.GetFidOutputRowCnt(nRequestId))
         print(self.GetFidOutputData(nRequestId, "1", 0))        
-        if self.m_nRqID == nRequestId:
+        if self.m_nRqId == nRequestId:
             
             print(self.GetFidOutputRowCnt(nRequestId))
             print(self.GetFidOutputData(nRequestId, "1", 0))
