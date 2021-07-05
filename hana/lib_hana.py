@@ -16,6 +16,7 @@ class HanaAPI:
         self.in_rec_name = None
         self.item = None
         self.value = None
+        self.m_nRqID = 0
         
         
         self.connected = False              # for login event
@@ -38,7 +39,22 @@ class HanaAPI:
     def _event_fid(self, nRequestId, pBlock, nBlockLength):
         logging.info(f"logging - OnGetFidData")
         print('*** OnGetFidData ***')
-        
+        print('*** nRequestId = %s' % nRequestId)
+        print(self.GetCommRecvOptionValue(0))
+        print(self.GetCommRecvOptionValue(1))
+        print(self.GetCommRecvOptionValue(2))
+        print(self.GetCommRecvOptionValue(3))
+        print(self.GetCommRecvOptionValue(4))
+        print(self.GetCommRecvOptionValue(5))
+        print(self.GetCommRecvOptionValue(6))
+
+        print(self.m_nRqID) 
+        print(self.GetFidOutputRowCnt(nRequestId))
+        print(self.GetFidOutputData(nRequestId, "1", 0))        
+        if self.m_nRqID == nRequestId:
+            
+            print(self.GetFidOutputRowCnt(nRequestId))
+            print(self.GetFidOutputData(nRequestId, "1", 0))
 
     def _handler_tr(self, nRequestId, pBlock, nBlockLength):
 

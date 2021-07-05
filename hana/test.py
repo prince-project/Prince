@@ -17,20 +17,24 @@ loc = 'C:\Prince_Data'
 
 pid = 'olguri'
 
+login_mode = 0 #(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
+
 hana = HanaAPI()
-execute_login(hana, 2, pid, "Dltmdals1205!", "ol751205@@")
+execute_login(hana, login_mode, pid, "Dltmdals1205!", "ol751205@@")
 execute_logout(hana, pid)
 
 m_nRqId = hana.CreateRequestID()
-strMarketCode = 'U'
-hana.SetFidInputData(m_nRqId, "9002", "001")
+hana.m_nRqId = m_nRqId
+strMarketCode = 'CM'
 hana.SetFidInputData(m_nRqId, "9001", strMarketCode)
-hana.SetFidInputData(m_nRqId, "GID", "1007")
+#hana.SetFidInputData(m_nRqId, "9002", "FESXU21")
+hana.SetFidInputData(m_nRqId, "GID", "1499")
 
-strOutputFidList = "4,5,7,11,28,12,977"
+strOutputFidList = "1,2,3,16,2624"
 strScreenNo = "9999"
 
 hana.RequestFid(m_nRqId, strOutputFidList, strScreenNo)
+hana.RequestFidArray(m_nRqId, strOutputFidList, "1", "", "9999", 9999)
 
 nDataCnt = hana.GetFidOutputRowCnt(m_nRqId)
 
