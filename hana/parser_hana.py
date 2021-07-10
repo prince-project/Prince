@@ -1,84 +1,49 @@
 import numpy  as np
 
-path_tr = "C:/1Q OpenAPI/1QApiAgent/TranRes"
+def read_res(res_code, res_type):
+    if res_type == 'tr':
+        dir_path = "C:/1Q OpenAPI/1QApiAgent/TranRes"
+    if res_type == 'real':
+        dir_path = "C:/1Q OpenAPI/1QApiAgent/RealRes"
 
-def read_trinfo(trcode, dir_path):
-    lines = []
-    on_off = False
-    for line in open("%s/kfoptrinfo.dat"%dir_path,"r"):
+    res_info = {}
+    res_info['input'] = {}
+    res_info['output'] = {}
 
-        curline = line.split("\n")
-        
-        if curline[0] == '[%s_TRINFO]'%trcode:
-            on_off = True
-            continue
+    input_line = False
+    output_line = False
+    i = 0
+    for line in open("%s/%s.res" % (dir_path, res_code), "r"):
+        curline = line.split("\n")[0].split(", ")
+        if len(curline) > 1:
+            rec_name_line = curline[0].split("\t\t")
 
-        if on_off:
-            if curline[0][10:16] == 'TRINFO':
-                break
-            else:
-                lines.append(curline[0].split("\t"))
-        else:
-            continue
+            if len(rec_name_line) > 1:
 
-    return lines
+                if (rec_name_line[1][:8] == 'REC_NAME') & ~input_line:
+                    input_line = True
+                    res_info['input']['rec_name'] = rec_name_line[1][9:]
+                    res_info['input']['items'] = pd.DataFrame(columns=['item', 'caption'])
+                    continue
 
-def parse_trinfo(trcode, lines):
+                if (input_line) & (curline[1][:4] == 'ITEM'):
+                    res_info['input']['items'].loc[i, 'item'] = curline[1][5:]
+                    res_info['input']['items'].loc[i, 'caption'] = curline[4][8:]
+                    i  += 1
+                    continue
 
-    trinfo = {"trcode": trcode, "input": [], "output": []}
-    on_input = False
-    on_output_single = False
-    on_output_multi = False
+                if (rec_name_line[1][:8] == 'REC_NAME') & input_line:
+                    input_line = False
+                    output_line = True 
+                    i = 0
+                    res_info['output']['rec_name'] = rec_name_line[1][9:]
+                    res_info['output']['items'] = pd.DataFrame(columns=['item', 'caption'])
+                    continue                
 
-    for i, x in enumerate(lines):
+                if (output_line) & (curline[1][:4] == 'ITEM'):
+                    res_info['output']['items'].loc[i, 'item'] = curline[1][5:]
+                    res_info['output']['items'].loc[i, 'caption'] = curline[4][8:]
+                    i  += 1
+                    continue
 
-        if x[0] == '[%s_INPUT]'%trcode:
-            on_input = True
-            trinfo["input"].append({})
-            continue
-
-        if on_input:
-            if x[0][0:5] == 'Title':
-                input_name = x[0].split("=")[1].strip()
-                trinfo["input"][0][input_name] = []
-                continue
-            if np.sum([k == '=' for k in x]) == 1 or np.sum([k == '= ' for k in x]) == 1:
-                trinfo["input"][0][input_name].append(x[0])
-                continue
-
-            if x[0][0] == '[':
-                on_input = False
-                continue
-
-        if x[0] == '[%s_OUTPUT]' % trcode:
-            on_input = False
-            on_output_single = True
-            trinfo["output"].append({})
-            continue
-
-        if on_output_single:
-            if x[0][0:5] == 'Title':
-                single_name = 'single' #x[0].split("=")[1].strip()
-                trinfo["output"][0][single_name] = []
-                continue
-            if np.sum([k == '=' for k in x]) == 1:
-                trinfo["output"][0][single_name].append(x[1])
-                continue                
-
-        if x[0][1:16] == '%s_OCCURS'% trcode:
-            on_output_single = False
-            on_output_multi = True
-            if len(trinfo['output']) == 0:
-                trinfo["output"].append({})
-            continue
-
-        if on_output_multi:
-            if x[0][0:5] == 'Title':
-                multi_name = 'multi' #x[0].split("=")[1].strip()
-                trinfo["output"][0][multi_name] = []
-                continue            
-            if np.sum([k == '=' for k in x]) == 1:
-                trinfo["output"][0][multi_name].append(x[1])
-                continue    
-
-    return trinfo
+    return res_info

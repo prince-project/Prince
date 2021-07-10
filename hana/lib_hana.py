@@ -5,6 +5,7 @@ import pythoncom
 import datetime
 #from pykiwoom import parser
 import pandas as pd
+import numpy as np
 import time
 import logging
 
@@ -12,14 +13,27 @@ import logging
 class HanaAPI:
     def __init__(self, login=False):
         self.ocx = QAxWidget("HFCOMMAGENT.HFCommAgentCtrl.1")
+        self.connected = False              # for login event
+        self.request_id = 0
+        self.tran_code = None
+        self.prev_next_code = None
+        self.prev_next_key = None
+        self.msg_code = None
+        self.msg = None
+        self.sub_msg_code = None
+        self.sub_msg = None
+        self.fid_list = None
+        self.fid_data = None
+        self.tmp_data_cnt = None
+
+
+
         self.tr_code = None
         self.in_rec_name = None
         self.item = None
         self.value = None
-        self.m_nRqId = 0
         
         
-        self.connected = False              # for login event
 
         self.received = False               # for tr event
         self.tr_items = None                # tr input/output items
@@ -39,22 +53,23 @@ class HanaAPI:
     def _event_fid(self, nRequestId, pBlock, nBlockLength):
         logging.info(f"logging - OnGetFidData")
         print('*** OnGetFidData ***')
-        print('*** nRequestId = %s' % nRequestId)
-        print(self.GetCommRecvOptionValue(0))
-        print(self.GetCommRecvOptionValue(1))
-        print(self.GetCommRecvOptionValue(2))
-        print(self.GetCommRecvOptionValue(3))
-        print(self.GetCommRecvOptionValue(4))
-        print(self.GetCommRecvOptionValue(5))
-        print(self.GetCommRecvOptionValue(6))
 
-        print(self.m_nRqId) 
-        print(self.GetFidOutputRowCnt(nRequestId))
-        print(self.GetFidOutputData(nRequestId, "1", 0))        
-        if self.m_nRqId == nRequestId:
-            
-            print(self.GetFidOutputRowCnt(nRequestId))
-            print(self.GetFidOutputData(nRequestId, "1", 0))
+        self.prev_next_code = self.GetCommRecvOptionValue(1)
+        self.prev_next_key = self.GetCommRecvOptionValue(2)
+        self.msg_code = self.GetCommRecvOptionValue(3)
+        self.msg = self.GetCommRecvOptionValue(4)
+        self.sub_msg_code = self.GetCommRecvOptionValue(5)
+        self.sub_msg = self.GetCommRecvOptionValue(6)
+
+        if self.request_id == nRequestId:
+            data_cnt = self.GetFidOutputRowCnt(nRequestId)
+            self.tmp_data_cnt = data_cnt
+            self.fid_data = pd.DataFrame(index=np.arange(data_cnt), columns=self.fid_list)
+            for i in np.arange(data_cnt):
+                for k in self.fid_list:
+                    self.fid_data.loc[i, k] = self.GetFidOutputData(nRequestId, k, i)
+
+        self.request_id = 0
 
     def _handler_tr(self, nRequestId, pBlock, nBlockLength):
 
@@ -141,7 +156,7 @@ class HanaAPI:
     def _set_signals_slots(self):
         self.ocx.OnAgentEventHandler.connect(self._event_connect)
         self.ocx.OnGetFidData.connect(self._event_fid)
-        self.ocx.OnGetTranData.connect(self._handler_tr)
+        #self.ocx.OnGetTranData.connect(self._handler_tr)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
@@ -688,6 +703,12 @@ class HanaAPI:
         반환: BSTR 옵션 처리 결과 문자열
         """
         return self.ocx.dynamicCall("SetOptionalFunction(int, int, int, QString, QString)", nOption, nValue1, nValue2, strValue1, strValue2)
+
+    def VerifyRequestCode(self, strReturnVal):
+        """
+        반환: 0 or 1
+        """
+        return self.ocx.dynamicCall("VerifyRequestCode(QString)", strReturnVal)
 
     ## 계좌관련메소드
     def GetAccInfo(self, nOption, szAccNo):
