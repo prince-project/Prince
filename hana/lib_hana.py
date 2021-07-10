@@ -26,12 +26,11 @@ class HanaAPI:
         self.fid_data = None
         self.tmp_data_cnt = None
 
-
-
+        self.res_info = None
+        
         self.tr_code = None
-        self.in_rec_name = None
-        self.item = None
-        self.value = None
+        self.tr_data = None
+
         
         
 
@@ -70,6 +69,30 @@ class HanaAPI:
                     self.fid_data.loc[i, k] = self.GetFidOutputData(nRequestId, k, i)
 
         self.request_id = 0
+
+    def _event_tran(self, nRequestId, pBlock, nBlockLength):
+        logging.info(f"logging - OnGetTranData")
+        print('*** OnGeTrandData ***')
+
+        self.prev_next_code = self.GetCommRecvOptionValue(1)
+        self.prev_next_key = self.GetCommRecvOptionValue(2)
+        self.msg_code = self.GetCommRecvOptionValue(3)
+        self.msg = self.GetCommRecvOptionValue(4)
+        self.sub_msg_code = self.GetCommRecvOptionValue(5)
+        self.sub_msg = self.GetCommRecvOptionValue(6)
+
+        if self.request_id == nRequestId:
+            data_cnt = self.GetTranOutputRowCnt(self.tr_code, self.res_info['output']['rec_name'])
+            self.tmp_data_cnt = data_cnt
+            tr_items = self.res_info['output']['items'].item
+            self.tr_data = pd.DataFrame(index=np.arange(data_cnt), columns=self.fid_list)
+            for i in np.arange(data_cnt):
+                for k in self.fid_list:
+                    self.fid_data.loc[i, k] = self.GetFidOutputData(nRequestId, k, i)
+
+
+
+
 
     def _handler_tr(self, nRequestId, pBlock, nBlockLength):
 
@@ -156,7 +179,7 @@ class HanaAPI:
     def _set_signals_slots(self):
         self.ocx.OnAgentEventHandler.connect(self._event_connect)
         self.ocx.OnGetFidData.connect(self._event_fid)
-        #self.ocx.OnGetTranData.connect(self._handler_tr)
+        self.ocx.OnGetTranData.connect(self._event_tran)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
 
