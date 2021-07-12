@@ -7,9 +7,10 @@ import importlib
 
 sys.path.append(os.path.abspath('C:\GitHub\Prince\hana'))
 from lib_hana import *
+from parser_hana import *
 from utils_hana import *
+
 from tabulate import tabulate
-#from Prince.hana.utils_hana import execute_logout
 
 """
 import lib_hana
@@ -20,18 +21,13 @@ from lib_hana import *
 def _table(df):
     return tabulate(df, headers = 'keys', tablefmt = 'pipe')
 
-
-loc = 'C:\Prince_Data'
-
 pid = 'olguri'
-
+pwd = hana.GetEncrpyt("Dltmdals1205!")
 login_mode = 0 #(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
 
-
-
 hana = HanaAPI()
-execute_login(hana, login_mode, pid, "Dltmdals1205!", "ol751205@@")
-#execute_logout(hana, pid)
+login(hana, login_mode, pid, pwd, "ol751205@@")
+#logout(hana, pid)
 
 
 #------------------------------------
@@ -94,64 +90,51 @@ if n_return < 0:
 
 
 #------------------------------------
-# Tran - 해외노릐 보유계좌 조회
+# Tran - 해외모의 보유계좌 조회
 #------------------------------------
+hana.tr_code = 'OTS5991Q03'
+hana.res_info = read_tr_res(hana.tr_code)
+hana.output_rec_name =  hana.res_info['output']['rec_name'] #'OTS5991Q03_out'
 hana.request_id = hana.CreateRequestID()
-hana.SetTranInputData(nRequestId, "OTS5991Q03", "OTS5991Q03_in", "USR_ID", "olguri")
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[0], 'olguri')
+
+n_return = hana.RequestTran(hana.request_id, hana.tr_code, "Y", "1", "", "9999", "Q", 9999)
+if n_return < 0:
+    print(hana.GetLastErrMsg())
+
 #------------------------------------
+# Tran - 파생시세신청여부조회
+#------------------------------------
+hana.tr_code = 'OAM5760Q50'
+hana.res_info = read_tr_res(hana.tr_code)
+hana.output_rec_name =  hana.res_info['output']['rec_name'] #'OTS5991Q03_out'
+hana.request_id = hana.CreateRequestID()
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[0], 'Y')
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[1], pid)
 
-execute_logout(hana, pid)
+n_return = hana.RequestTran(hana.request_id, hana.tr_code, "Y", "1", "", "9999", "Q", 9999)
+if n_return < 0:
+    print(hana.GetLastErrMsg())
 
 #------------------------------------
+# Tran - 예수금내역
 #------------------------------------
-#------------------------------------
-res_info = read_res(res_code, res_type)
+hana.tr_code = 'OTS5943Q01'
+hana.res_info = read_tr_res(hana.tr_code)
+hana.output_rec_name =  hana.res_info['output']['rec_name'] #'OTS5991Q03_out'
+hana.request_id = hana.CreateRequestID()
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[0], '2021/7/9')
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[1], 'A66242597')
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[2], '220')
+hana.SetTranInputData(hana.request_id, hana.tr_code, hana.res_info['input']['rec_name'], hana.res_info['input']['items'].item[3], '1205')
 
-open("%s/%s.res" % (dir_path, res_code), "r")
-
-res_code = 'OTS5991Q03'
-dir_path = "C:/1Q OpenAPI/1QApiAgent/TranRes"
-
-res_info = {}
-res_info['input'] = {}
-res_info['output'] = {}
-
-input_line = False
-output_line = False
-i = 0
-for line in open("%s/%s.res" % (dir_path, res_code), "r"):
-    curline = line.split("\n")[0].split(", ")
-    if len(curline) > 1:
-        rec_name_line = curline[0].split("\t\t")
-
-        if len(rec_name_line) > 1:
-
-            if (rec_name_line[1][:8] == 'REC_NAME') & ~input_line:
-                input_line = True
-                res_info['input']['rec_name'] = rec_name_line[1][9:]
-                res_info['input']['items'] = pd.DataFrame(columns=['item', 'caption'])
-                continue
-
-            #if (input_line) & (curline[0].split("\t\t\t ")[1][:5] == 'INDEX'):
-            if (input_line) & (curline[1][:4] == 'ITEM'):
-                res_info['input']['items'].loc[i, 'item'] = curline[1][5:]
-                res_info['input']['items'].loc[i, 'caption'] = curline[4][8:]
-                i  += 1
-                continue
-
-            if (rec_name_line[1][:8] == 'REC_NAME') & input_line:
-                input_line = False
-                output_line = True 
-                i = 0
-                res_info['output']['rec_name'] = rec_name_line[1][9:]
-                res_info['output']['items'] = pd.DataFrame(columns=['item', 'caption'])
-                continue                
-
-            if (output_line) & (curline[1][:4] == 'ITEM'):
-                res_info['output']['items'].loc[i, 'item'] = curline[1][5:]
-                res_info['output']['items'].loc[i, 'caption'] = curline[4][8:]
-                i  += 1
-                continue
+n_return = hana.RequestTran(hana.request_id, hana.tr_code, "Y", "1", "", "9999", "Q", 9999)
+if n_return < 0:
+    print(hana.GetLastErrMsg())
 
 
-curline[0].split(", ")[1]
+
+ dir_path = "C:/1Q OpenAPI/1QApiAgent/TranRes"
+ hana.LoadTranResource(dir_path)
+
+

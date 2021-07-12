@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.abspath('C:\GitHub\hana'))
 from lib_hana import *
 
-def execute_login(HanaAPI, login_mode, pid, pwd, cert_pwd):
+def login(HanaAPI, login_mode, pid, pwd, cert_pwd):
 
     #**********************************************************
     # 접속서버를 설정한다.(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
@@ -55,7 +55,7 @@ def execute_login(HanaAPI, login_mode, pid, pwd, cert_pwd):
     # 미체결 실시간 통보
     #HanaAPI.RegisterReal("EF4", pid)
 
-def execute_logout(HanaAPI, pid):
+def logout(HanaAPI, pid):
 
     #**********************************************************
     # LogOut 처리

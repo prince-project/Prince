@@ -27,7 +27,7 @@ class HanaAPI:
         self.tmp_data_cnt = None
 
         self.res_info = None
-        
+        self.output_rec_name = None        
         self.tr_code = None
         self.tr_data = None
 
@@ -62,6 +62,7 @@ class HanaAPI:
 
         if self.request_id == nRequestId:
             data_cnt = self.GetFidOutputRowCnt(nRequestId)
+            print(data_cnt)
             self.tmp_data_cnt = data_cnt
             self.fid_data = pd.DataFrame(index=np.arange(data_cnt), columns=self.fid_list)
             for i in np.arange(data_cnt):
@@ -70,9 +71,11 @@ class HanaAPI:
 
         self.request_id = 0
 
+        print(self.msg)
+
     def _event_tran(self, nRequestId, pBlock, nBlockLength):
         logging.info(f"logging - OnGetTranData")
-        print('*** OnGeTrandData ***')
+        print('*** OnGeTranData ***')
 
         self.prev_next_code = self.GetCommRecvOptionValue(1)
         self.prev_next_key = self.GetCommRecvOptionValue(2)
@@ -80,185 +83,31 @@ class HanaAPI:
         self.msg = self.GetCommRecvOptionValue(4)
         self.sub_msg_code = self.GetCommRecvOptionValue(5)
         self.sub_msg = self.GetCommRecvOptionValue(6)
-
+        print(nRequestId)
         if self.request_id == nRequestId:
-            data_cnt = self.GetTranOutputRowCnt(self.tr_code, self.res_info['output']['rec_name'])
+            data_cnt = self.GetTranOutputRowCnt(self.tr_code, self.output_rec_name)#self.res_info['output']['rec_name'])
             self.tmp_data_cnt = data_cnt
-            tr_items = self.res_info['output']['items'].item
+            self.tr_items = self.res_info['output']['items'].item
             self.tr_data = pd.DataFrame(index=np.arange(data_cnt), columns=self.fid_list)
             for i in np.arange(data_cnt):
-                for k in self.fid_list:
-                    self.fid_data.loc[i, k] = self.GetFidOutputData(nRequestId, k, i)
+                for k in self.tr_items:
+                    self.tr_data.loc[i, k] = self.GetTranOutputData(self.tr_code, self.output_rec_name, k, i) #self.res_info['output']['rec_name'], k, i)
+
+        self.request_id = 0
+
+        print(self.msg)
 
 
-
-
-
-    def _handler_tr(self, nRequestId, pBlock, nBlockLength):
-
-        # 연속조회(0 : 연속조회 미사용,1 : 이전 데이터 있음,2 : 다음 데이터 있음,3 : 이전/다음 데이터 있음)
-        strPreNext = self.GetCommRecvOptionValue(1)
-        #연속조회키
-        strPreNextContext = self.GetCommRecvOptionValue(2)
-        #조회응답 메시지코드
-        strMsgCode = self.GetCommRecvOptionValue(3)
-        #조회응답 메시지
-        strMsg = self.GetCommRecvOptionValue(4)
-        #조회응답 부가메시지코드
-        strSubMsgCode = self.GetCommRecvOptionValue(5)
-        #조회응답 부가메시지
-        strSubMsg = self.GetCommRecvOptionValue(6)
-
-        self.m_nRqID = self.CreateRequestID()
-
-
-
-
-        self.m_nRqID = 0
-
-        #print('*********************************************')
-        #print(next)
-        logging.info(f"OnReceiveTrData {screen} {rqname} {trcode} {record} {next}")
-        try:
-            record = None
-            items = None
-            self.next = next
-            print('*** %s ***' % self.next)
-            #print(self.tr_remained)
-            #print(self)
-            #print(screen)
-            #print(rqname)
-            #print(record)
-            #print(next)
-            #print(len(next))
-            #if next == 'None':
-            #    print("******")
-            # remained data
-            if len(next) > 1:
-                self.tr_remained = True
-            else:
-                self.tr_remained = False
-
-            #print(self.tr_remained)
-            for record in self.tr_items['output'][0]:
-                #record = list(output.keys())[0]
-                items = self.tr_items['output'][0][record]
-                if record == self.tr_record:
-                    break
-            
-            #print(self.tr_items['output'])
-            #print(record)
-            #print(self.tr_record)
-            #print(items)
-            rows = self.GetRepeatCnt(trcode, rqname)
-            if rows == 0:
-                rows = 1
-
-            data_list = []
-            for row in range(rows):
-                row_data = []
-                for item in items:
-                    #print(item)
-                    data = self.GetCommData(trcode, rqname, row, item)
-                    row_data.append(data)
-                data_list.append(row_data)
-
-            # data to DataFrame
-            df = pd.DataFrame(data=data_list, columns=items)
-            self.tr_data = df
-            self.received = True
-        except:
-            pass
-
-    def _handler_msg(self, screen, rqname, trcode, msg):
-        logging.info(f"OnReceiveMsg {screen} {rqname} {trcode} {msg}")
-
-    def _handler_chejan(self, gubun, item_cnt, fid_list):
-        logging.info(f"OnReceiveChejanData {gubun} {item_cnt} {fid_list}")
-
+    #-------------------------------------------------------------------------------------------------------------------
+    # 이벤트 상세
+    #-------------------------------------------------------------------------------------------------------------------
     def _set_signals_slots(self):
         self.ocx.OnAgentEventHandler.connect(self._event_connect)
         self.ocx.OnGetFidData.connect(self._event_fid)
         self.ocx.OnGetTranData.connect(self._event_tran)
         #self.ocx.OnReceiveMsg.connect(self._handler_msg)
         #self.ocx.OnReceiveChejanData.connect(self._handler_chejan)
-
-    #-------------------------------------------------------------------------------------------------------------------
-    # 이벤트 상세
-    #-------------------------------------------------------------------------------------------------------------------
-    #def _set_signals_slots(self):
-    #    self.ocx.OnGetTranData.connect(self._get_tran_data)
-    #    self.ocx.OnGetFidData.connect(self._get_fid_data)
-    #    self.ocx.OnGetRealData.connect(self._get_real_data)
-    #    self.ocx.OnAgentEventHandler.connect(self._agent_event_handler)
         
-
-    def _get_tran_data(self, nRequestId, pBlock, nBlockLength):
-        """
-        01
-        원형: void OnGetTranData(LONG nRequestId, BSTR pBlock, long nBlockLength)
-        설명: Tran조회응답 이벤트 -> 주문체결/잔고 등 조회 결과 데이터를 서버로부터 수신하는 이벤트
-        호출: API 에이전트 컨트롤 CallBack
-        인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
-              BSTR pBlock - 응답 데이터 블록
-              long nBlockLength - 응답 데이터 블록 크기
-        반환: 없음
-        주의: OnGetTranData 이벤트에서 인자 또는 함수로 얻은 값은 모두 휘발성으로 이벤트 콜백함수 종료 후에는 유효하지 않음.
-        """
-        logging.info(f"OnGetTranData {nRequestId} {pBlock} {nBlockLength}")
-
-        str_tr_code = self.GetCommRecvOptionValue(0)
-        str_pre_next = self.GetCommRecvOptionValue(1)
-        str_pre_next_context = self.GetCommRecvOptionValue(2)
-        str_msg_code = self.GetCommRecvOptionValue(3)
-        str_msg = self.GetCommRecvOptionValue(4)
-        str_sub_msg_code = self.GetCommRecvOptionValue(5)
-        str_sub_msg = self.GetCommRecvOptionValue(6)
-        str_is_error = self.GetCommRecvOptionValue(7)
-        str_err_msg = self.GetLastErrMsg()
-
-
-    def _get_fid_data(self, nRequestId, pBlock, nBlockLength):
-        """
-        02
-        원형: void OnGetFidData(LONG nRequestId, BSTR pBlock, long nBlockLength)
-        설명: FID조회응답 이벤트
-        호출: API 에이전트 컨트롤 CallBack
-        인자: LONG nRequestId - 조회고유ID(Request ID) - CreateRequestID메소드로 생성
-              BSTR pBlock - 응답 데이터 블록
-              long nBlockLength - 응답 데이터 블록 크기
-        반환: 없음	
-        """
-        logging.info(f"OnGetFidData {nRequestId} {pBlock} {nBlockLength}")
-
-    def _get_real_data(self, strRealName, strRealKey, pBlock, nBlockLength):
-        """
-        03
-        원형: void OnGetRealData(BSTR strRealName, BSTR strRealKey, LPCTSTR pBlock, long nBlockLength)
-        설명: 실시간데이터 수신 이벤트
-        호출: API 에이전트 컨트롤 CallBack
-        인자: BSTR strRealName - 실시간 수신 데이터 실시간코드명 - 실시간 리소스파일(*.res)파일의 'REAL_NAME=' 항목(ex-> "S00")
-        BSTR strRealKey - 실시간 수신 실시간등록키(ex-> "000660" : SK하이닉스 종목코드)
-              LPCTSTR pBlock - 수신 데이터 블록
-              long nBlockLength - 수신 데이터 블록 크기
-        반 환	없음	
-        """
-        logging.info(f"OnGetRealData {strRealName} {strRealKey} {pBlock} {nBlockLength}")
-
-    def _agent_event_handler(self, nEventType, nParam, strParam):
-        """
-        04
-        원형: void OnAgentEventHandler(long nEventType, long nParam, LPCTSTR strParam)
-        설명: 통신 접속 해제 등 이벤트
-        호출: API 에이전트 컨트롤 CallBack
-        인자: long nEventType - 통신 이벤트: 100 이상, 공지 이벤트 : 150 이상
-              long nParam - 옵션값
-              LPCTSTR strParam - 옵션값	
-        반환: 없음	
-        기타: StockSiseDlg.cpp, FFutOptOrdDlg.cpp 예제 참고
-        """
-        logging.info(f"OnAgentEventHandler {nEventType} {nParam} {strParam}")
-
 
     #-------------------------------------------------------------------------------------------------------------------
     # API 메소드 상세
