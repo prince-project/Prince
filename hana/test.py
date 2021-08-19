@@ -22,7 +22,7 @@ def _table(df):
     return tabulate(df, headers = 'keys', tablefmt = 'pipe')
 
 pid = 'olguri'
-pwd = hana.GetEncrpyt("Dltmdals1205!")
+pwd = "Dltmdals1205!" #hana.GetEncrpyt()
 login_mode = 0 #(0 - 리얼, 1 - 국내모의, 2 - 해외모의)
 
 hana = HanaAPI()
@@ -33,21 +33,45 @@ login(hana, login_mode, pid, pwd, "ol751205@@")
 #------------------------------------
 # 해외선물종목리스트 FID
 #------------------------------------
-hana.request_id = hana.CreateRequestID()
+#hana.request_id = hana.CreateRequestID()
+hana.rq_id_code_list = hana.CreateRequestID()
 strMarketCode = 'FF'
-hana.SetFidInputData(hana.request_id, "9001", strMarketCode)
-#hana.SetFidInputData(m_nRqId, "9002", "FESXU21"
-hana.SetFidInputData(hana.request_id, "GID", "3299")
+hana.SetFidInputData(hana.rq_id_code_list, "9001", strMarketCode)
+hana.SetFidInputData(hana.rq_id_code_list, "GID", "3299")
 
-#hana.fid_list = ['1','2','3','16','2624']
 hana.fid_list = ['1','2','3','1448','2083','661','1170','1987','2467','2456','2457','2295','1396',
 				'1773','1772','1731','2460','226','132','981','1203','1268','1171','2459','133',
                 '1759','16','10','28','1762','1870','1871','2486','2487','815','9','128','129','2596']
 strOutputFidList = ','.join(hana.fid_list)
 strScreenNo = "9999"
 
-#n_return = hana.RequestFid(m_nRqId, strOutputFidList, strScreenNo)
-n_return = hana.RequestFidArray(hana.request_id, strOutputFidList, "1", "", "9999", 9999)
+n_return = hana.RequestFidArray(hana.rq_id_code_list, strOutputFidList, "1", "", strScreenNo, 9999)
+if n_return < 0:
+    print(hana.GetLastErrMsg())
+
+#------------------------------------
+# 현재가 조회 FID
+#------------------------------------
+
+strMarketCode = 'FF'
+strRealName = 'V10'
+strSymBol = 'VXMU21'
+
+hana.rq_id_cur_price = hana.CreateRequestID()
+if hana.cur_price_real_key is not None:
+    hana.UnRegisterReal(strRealName, hana.cur_price_real_key)
+    hana.cur_price_real_key = None
+hana.cur_price_real_key = strSymBol
+
+hana.SetFidInputData(hana.rq_id_cur_price, "9002", strSymBol)
+hana.SetFidInputData(hana.rq_id_cur_price, "9001", strMarketCode)
+hana.SetFidInputData(hana.rq_id_cur_price, "GID", "1000")
+
+hana.fid_list = ['4','6','5','7','11','28','13','14','15']
+strOutputFidList = ','.join(hana.fid_list)
+strScreenNo = "9999"
+
+n_return = hana.RequestFid(hana.rq_id_cur_price, strOutputFidList, strScreenNo)
 if n_return < 0:
     print(hana.GetLastErrMsg())
 

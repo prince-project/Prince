@@ -24,13 +24,19 @@ class HanaAPI:
         self.sub_msg = None
         self.fid_list = None
         self.fid_data = None
-        self.tmp_data_cnt = None
-
+        self.data_cnt = None
+        self.tmp_verify = None
+        self.cur_price_real_key = None
         self.res_info = None
         self.output_rec_name = None        
         self.tr_code = None
         self.tr_data = None
-
+        self.rq_id_hoga = 0
+        self.rq_id_cur_price = 0
+        self.rq_id_tick = 0
+        self.rq_id_code_list = 0
+        self.rq_id_code_list2 = 0
+        self.rq_id_chart = 0
         
         
 
@@ -60,16 +66,48 @@ class HanaAPI:
         self.sub_msg_code = self.GetCommRecvOptionValue(5)
         self.sub_msg = self.GetCommRecvOptionValue(6)
 
-        if self.request_id == nRequestId:
-            data_cnt = self.GetFidOutputRowCnt(nRequestId)
-            print(data_cnt)
-            self.tmp_data_cnt = data_cnt
-            self.fid_data = pd.DataFrame(index=np.arange(data_cnt), columns=self.fid_list)
-            for i in np.arange(data_cnt):
+        #if self.request_id == nRequestId:
+        #    self.data_cnt = self.GetFidOutputRowCnt(nRequestId)
+        #    print(nRequestId)
+        #    print(self.data_cnt)
+        #    self.fid_data = pd.DataFrame(index=np.arange(self.data_cnt), columns=self.fid_list)
+        #    for i in np.arange(self.data_cnt):
+        #        for k in np.arange(len(self.fid_list)):
+        #            self.fid_data.loc[i, self.fid_list[k]] = self.GetFidOutputData(nRequestId, self.fid_list[k], i)
+        #            if k == 0:
+        #                self.tmp_verify = self.VerifyRequestCode(self.fid_data.loc[i, self.fid_list[k]])
+        #                if self.tmp_verify:
+        #                    print("+++++++++++++++++++++")
+        #                    continue
+        #    self.request_id = 0
+
+        if self.rq_id_code_list == nRequestId:
+            self.data_cnt = self.GetFidOutputRowCnt(nRequestId)
+            print(nRequestId)
+            print(self.data_cnt)
+            self.fid_data = pd.DataFrame(index=np.arange(self.data_cnt), columns=self.fid_list)
+            for i in np.arange(self.data_cnt):
                 for k in self.fid_list:
                     self.fid_data.loc[i, k] = self.GetFidOutputData(nRequestId, k, i)
+                    if k == 0:
+                        self.tmp_verify = self.VerifyRequestCode(self.fid_data.loc[i, k])
+                        if self.tmp_verify:
+                            print("+++++++++++++++++++++")
+                            continue
+            #m_strCodeListNextRqKey = strPreNextContext
+            self.rq_id_code_list = 0
 
-        self.request_id = 0
+        if self.rq_id_cur_price == nRequestId:
+            self.fid_data = pd.DataFrame(columns=self.fid_list)
+            for k in self.fid_list:
+                self.fid_data.loc[0, k] = self.GetFidOutputData(nRequestId, k, 0)
+            
+            if self.cur_price_real_key is not None:
+                strRealName = "V10"
+                self.RegisterReal(strRealName, self.cur_price_real_key)
+            
+            self.rq_id_cur_price = 0
+
 
         print(self.msg)
 
